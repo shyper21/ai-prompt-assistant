@@ -1,19 +1,25 @@
-# AI Prompt Assistant MVP
+# PromptForge AI — Futuristic MVP
 
-Website MVP dengan tampilan mirip referensi `ngodingpakeai`.
+Website generator PRD dan prompt teknis untuk membantu pengguna mengubah ide aplikasi menjadi brief yang siap dipakai di ChatGPT, Claude, Gemini, Codex, atau developer.
 
-## Fitur
+## Perubahan versi ini
 
-- Landing page dark mode
-- Textarea untuk menulis ide aplikasi
-- Generator PRD singkat lokal, tanpa API eksternal
-- Tombol copy hasil
-- Responsive desktop dan mobile
-- Siap deploy ke Vercel
+- UI tidak lagi meniru screenshot awal secara langsung.
+- Tampilan dibuat lebih futuristik dengan glassmorphism, neon glow, gradient, dan grid background.
+- Output prompt dibuat lebih lengkap:
+  - Ringkasan produk
+  - Masalah utama
+  - Target pengguna
+  - Fitur MVP
+  - User flow
+  - Struktur halaman
+  - Tech stack
+  - Database awal
+  - API/server actions
+  - Acceptance criteria
+  - Prompt khusus untuk Codex / AI coding agent
 
 ## Cara menjalankan lokal
-
-Pastikan Node.js sudah terinstall.
 
 ```bash
 npm install
@@ -30,33 +36,15 @@ http://localhost:3000
 
 ```bash
 npm run build
-npm run start
 ```
 
 ## Deploy ke Vercel
 
-1. Upload project ini ke GitHub.
-2. Buka Vercel.
-3. Klik Add New Project.
-4. Pilih repository GitHub.
-5. Framework akan otomatis terbaca sebagai Next.js.
-6. Klik Deploy.
+1. Upload semua file ke GitHub.
+2. Import repository ke Vercel.
+3. Framework akan terdeteksi sebagai Next.js.
+4. Klik Deploy.
 
-## Struktur folder
+## Catatan
 
-```text
-app/
-  globals.css
-  layout.tsx
-  page.tsx
-components/
-  GeneratedPRD.tsx
-  HeroInput.tsx
-  Navbar.tsx
-lib/
-  generate-prd.ts
-```
-
-## Catatan versi
-
-Project ini memakai Next.js 15.5.6 dan Tailwind CSS 3.4.17 agar konfigurasi PostCSS sederhana tetap kompatibel di Vercel.
+Versi ini masih local generator, jadi belum membutuhkan OpenAI API, Firebase, atau Supabase.

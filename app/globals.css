@@ -17,9 +17,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 50% -10%, rgba(51, 65, 85, 0.35), transparent 38%),
-    #111827;
+  background: #070A12;
   color: #e5e7eb;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -32,6 +30,29 @@ select {
   font: inherit;
 }
 
+textarea {
+  scrollbar-width: thin;
+}
+
 ::selection {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(34, 211, 238, 0.35);
+}
+
+.glass-panel {
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.78), rgba(30, 41, 59, 0.48)),
+    rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(36px);
+  opacity: 0.45;
+  pointer-events: none;
 }

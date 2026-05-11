@@ -8,13 +8,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        page: "#111827",
-        panel: "#202838",
-        panelSoft: "#263044",
-        accent: "#9b4d3d",
+        void: "#070A12",
+        ink: "#0B1020",
+        glass: "rgba(15, 23, 42, 0.72)",
+        cyanGlow: "#22D3EE",
+        violetGlow: "#A78BFA",
+        limeGlow: "#A3E635",
       },
       boxShadow: {
-        soft: "0 18px 60px rgba(0, 0, 0, 0.28)",
+        neon: "0 0 40px rgba(34, 211, 238, 0.18)",
+        violet: "0 0 50px rgba(167, 139, 250, 0.18)",
+      },
+      backgroundImage: {
+        "grid-pattern":
+          "linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px)",
       },
     },
   },

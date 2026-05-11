@@ -1,29 +1,40 @@
-import { Menu } from "lucide-react";
+import { Menu, Sparkles, Zap } from "lucide-react";
 
 export default function Navbar() {
   return (
-    <header className="flex h-[72px] w-full items-center justify-between px-5 sm:px-7">
-      <div className="flex items-center gap-5">
+    <header className="relative z-20 mx-auto flex h-[76px] w-full max-w-7xl items-center justify-between px-5 sm:px-7">
+      <div className="flex items-center gap-4">
         <button
           aria-label="Open menu"
-          className="grid h-10 w-10 place-items-center rounded-xl text-slate-300 transition hover:bg-white/5 hover:text-white"
+          className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-100"
         >
-          <Menu size={24} />
+          <Menu size={23} />
         </button>
 
-        <div className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-          ngodingpake<span className="text-slate-300">ai</span>
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300 via-violet-400 to-fuchsia-500 text-slate-950 shadow-neon">
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <div className="text-lg font-black tracking-tight text-white sm:text-2xl">
+              PromptForge<span className="text-cyan-300"> AI</span>
+            </div>
+            <div className="-mt-1 hidden text-[11px] uppercase tracking-[0.28em] text-slate-500 sm:block">
+              build ready prompts
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="hidden rounded-full bg-[#202838] px-3 py-1 text-sm font-semibold text-slate-400 sm:inline-flex">
-          Free
+        <span className="hidden rounded-full border border-lime-300/20 bg-lime-300/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-lime-200 sm:inline-flex">
+          MVP
         </span>
-        <button className="rounded-2xl bg-[#e45f3f] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-950/20 transition hover:bg-[#f06c4c] sm:text-base">
-          Upgrade
+        <button className="group hidden items-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-sm font-bold text-cyan-100 transition hover:bg-cyan-300/20 sm:inline-flex">
+          <Zap size={16} className="transition group-hover:rotate-12" />
+          Generate
         </button>
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-700 text-sm font-bold text-slate-300">
+        <div className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-gradient-to-br from-slate-700 to-slate-900 text-sm font-black text-slate-100">
           J
         </div>
       </div>
