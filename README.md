@@ -56,3 +56,7 @@ components/
 lib/
   generate-prd.ts
 ```
+
+## Catatan versi
+
+Project ini memakai Next.js 15.5.6 dan Tailwind CSS 3.4.17 agar konfigurasi PostCSS sederhana tetap kompatibel di Vercel.

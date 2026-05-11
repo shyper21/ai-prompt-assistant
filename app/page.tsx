@@ -1,4 +1,4 @@
-import { FileText, Youtube } from "lucide-react";
+import { FileText } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import HeroInput from "@/components/HeroInput";
 
@@ -44,7 +44,7 @@ export default function Home() {
             <span className="font-bold">Raf Dev</span>
             <span className="text-slate-400">22.4K</span>
             <span className="grid h-5 w-7 place-items-center rounded-md bg-red-600 text-white">
-              <Youtube size={13} fill="currentColor" />
+              <span className="text-[10px] leading-none">▶</span>
             </span>
           </span>
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#202838] text-white">
