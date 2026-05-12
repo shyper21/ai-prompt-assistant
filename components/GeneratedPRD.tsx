@@ -6,6 +6,7 @@ import { ArrowLeft, Check, Copy, FileDown, RotateCcw, TerminalSquare } from "luc
 type GeneratedPRDProps = {
   content: string;
   isGenerating?: boolean;
+  message?: string;
   onBackToEdit?: () => void;
   onRegenerate?: () => void;
 };
@@ -13,6 +14,7 @@ type GeneratedPRDProps = {
 export default function GeneratedPRD({
   content,
   isGenerating = false,
+  message,
   onBackToEdit,
   onRegenerate,
 }: GeneratedPRDProps) {
@@ -91,6 +93,12 @@ export default function GeneratedPRD({
           </button>
         </div>
       </div>
+
+      {message ? (
+        <div className="border-b border-cyan-300/15 bg-cyan-300/10 px-5 py-3 text-sm leading-6 text-cyan-50">
+          {message}
+        </div>
+      ) : null}
 
       <pre className="max-h-[660px] overflow-auto whitespace-pre-wrap p-5 text-sm leading-7 text-slate-200 sm:p-6">
         {content}

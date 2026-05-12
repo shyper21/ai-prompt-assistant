@@ -8,13 +8,13 @@ import QuestionsStep from "@/components/QuestionsStep";
 import TechPreferenceStep from "@/components/TechPreferenceStep";
 import {
   detectProjectDomain,
-  generatePRD,
   getDynamicQuestionChips,
   getDynamicQuestions,
   type PrdAnswer,
   type SelectedTech,
   type TechMode,
 } from "@/lib/generate-prd";
+import { savePrdMemory } from "@/lib/prd-memory";
 
 type WizardStep = "idea" | "tech" | "questions" | "result";
 
@@ -32,6 +32,29 @@ const defaultTech: SelectedTech = {
   deployment: "Vercel",
 };
 
+type AnalyzeQuestion = {
+  question: string;
+  chips: string[];
+};
+
+type AnalyzeResponse = {
+  source?: "openrouter" | "local";
+  fallback?: boolean;
+  reason?: string;
+  domain?: string;
+  summary?: string;
+  questions?: AnalyzeQuestion[];
+  error?: string;
+};
+
+type GenerateResponse = {
+  source?: "openrouter" | "local";
+  fallback?: boolean;
+  reason?: string;
+  prd?: string;
+  error?: string;
+};
+
 export default function PRDWizard() {
   const [step, setStep] = useState<WizardStep>("idea");
   const [idea, setIdea] = useState("");
@@ -42,10 +65,19 @@ export default function PRDWizard() {
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [generatedPrd, setGeneratedPrd] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [apiMessage, setApiMessage] = useState("");
+  const [aiQuestions, setAiQuestions] = useState<AnalyzeQuestion[] | null>(null);
 
   const domain = useMemo(() => detectProjectDomain(idea), [idea]);
-  const questions = useMemo(() => getDynamicQuestions(domain), [domain]);
-  const questionChips = useMemo(() => getDynamicQuestionChips(domain), [domain]);
+  const questions = useMemo(
+    () => aiQuestions?.map((item) => item.question) || getDynamicQuestions(domain),
+    [aiQuestions, domain],
+  );
+  const questionChips = useMemo(
+    () => aiQuestions?.map((item) => item.chips) || getDynamicQuestionChips(domain),
+    [aiQuestions, domain],
+  );
 
   const activeStepIndex = useMemo(
     () => stepItems.findIndex((item) => item.id === step),
@@ -76,7 +108,48 @@ export default function PRDWizard() {
     }
 
     setIdeaError("");
+    setAiQuestions(null);
+    setApiMessage("");
     setStep("tech");
+  }
+
+  async function analyzeIdeaAndGoToQuestions() {
+    setIsAnalyzing(true);
+    setApiMessage("");
+
+    try {
+      const response = await fetch("/api/analyze-idea", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idea }),
+      });
+      const data = (await response.json()) as AnalyzeResponse;
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Gagal menganalisis ide.");
+      }
+
+      if (data.questions?.length) {
+        setAiQuestions(data.questions);
+      }
+
+      if (data.fallback && data.reason) {
+        setApiMessage(`OpenRouter fallback: ${data.reason}`);
+      } else {
+        setApiMessage(data.source === "openrouter" ? "Analisis ide dibuat dengan OpenRouter." : "");
+      }
+
+      setStep("questions");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gagal menganalisis ide.";
+      setAiQuestions(null);
+      setApiMessage(`${message} Menggunakan pertanyaan lokal.`);
+      setStep("questions");
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   function handleModeChange(mode: TechMode) {
@@ -127,17 +200,47 @@ export default function PRDWizard() {
   function handleGenerate() {
     setIsGenerating(true);
 
-    window.setTimeout(() => {
-      const prd = generatePRD({
+    async function run() {
+      const payload = {
         idea,
         techMode,
         selectedTech,
         answers,
-      });
-      setGeneratedPrd(prd);
-      setIsGenerating(false);
-      setStep("result");
-    }, 350);
+      };
+
+      try {
+        const response = await fetch("/api/generate-prd", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        const data = (await response.json()) as GenerateResponse;
+
+        if (!response.ok || data.error || !data.prd) {
+          throw new Error(data.error || "Gagal generate PRD.");
+        }
+
+        setGeneratedPrd(data.prd);
+        setApiMessage(data.fallback && data.reason ? `OpenRouter fallback: ${data.reason}` : "");
+        savePrdMemory({
+          idea,
+          answers,
+          generatedPrd: data.prd,
+          createdAt: new Date().toISOString(),
+          userFeedback: "",
+        });
+        setStep("result");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Gagal generate PRD.";
+        setApiMessage(message);
+      } finally {
+        setIsGenerating(false);
+      }
+    }
+
+    void run();
   }
 
   function handleRegenerate() {
@@ -182,7 +285,8 @@ export default function PRDWizard() {
           onModeChange={handleModeChange}
           onTechChange={handleTechChange}
           onBack={() => setStep("idea")}
-          onNext={() => setStep("questions")}
+          onNext={analyzeIdeaAndGoToQuestions}
+          isAnalyzing={isAnalyzing}
         />
       ) : null}
 
@@ -193,6 +297,7 @@ export default function PRDWizard() {
           answers={answers}
           activeQuestion={activeQuestion}
           isGenerating={isGenerating}
+          message={apiMessage}
           onAnswerChange={handleAnswerChange}
           onChipSelect={handleChipSelect}
           onSkip={goToNextQuestion}
@@ -206,6 +311,7 @@ export default function PRDWizard() {
         <GeneratedPRD
           content={generatedPrd}
           isGenerating={isGenerating}
+          message={apiMessage}
           onBackToEdit={() => setStep("idea")}
           onRegenerate={handleRegenerate}
         />

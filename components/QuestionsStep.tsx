@@ -9,6 +9,7 @@ type QuestionsStepProps = {
   answers: PrdAnswer[];
   activeQuestion: number;
   isGenerating: boolean;
+  message?: string;
   onAnswerChange: (index: number, answer: string) => void;
   onChipSelect: (index: number, value: string) => void;
   onSkip: () => void;
@@ -23,6 +24,7 @@ export default function QuestionsStep({
   answers,
   activeQuestion,
   isGenerating,
+  message,
   onAnswerChange,
   onChipSelect,
   onSkip,
@@ -62,6 +64,12 @@ export default function QuestionsStep({
             style={{ width: `${((activeQuestion + 1) / questions.length) * 100}%` }}
           />
         </div>
+
+        {message ? (
+          <div className="mb-4 rounded-lg border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm leading-6 text-cyan-50">
+            {message}
+          </div>
+        ) : null}
 
         <div className="rounded-lg border border-white/10 bg-slate-950/45 p-4">
           <div className="text-xs font-bold uppercase text-slate-500">

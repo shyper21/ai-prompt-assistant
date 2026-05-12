@@ -10,6 +10,7 @@ type TechPreferenceStepProps = {
   onTechChange: (key: keyof SelectedTech, value: string) => void;
   onBack: () => void;
   onNext: () => void;
+  isAnalyzing?: boolean;
 };
 
 const techOptions = {
@@ -33,6 +34,7 @@ export default function TechPreferenceStep({
   onTechChange,
   onBack,
   onNext,
+  isAnalyzing = false,
 }: TechPreferenceStepProps) {
   return (
     <section className="glass-panel overflow-hidden rounded-lg">
@@ -132,9 +134,10 @@ export default function TechPreferenceStep({
           <button
             type="button"
             onClick={onNext}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-cyan-300 via-lime-200 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-neon transition hover:scale-[1.01]"
+            disabled={isAnalyzing}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-cyan-300 via-lime-200 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-neon transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Next
+            {isAnalyzing ? "Menganalisis ide..." : "Next"}
             <ArrowRight size={18} />
           </button>
         </div>

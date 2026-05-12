@@ -15,7 +15,7 @@ import PRDWizard from "@/components/PRDWizard";
 
 const chips = [
   { label: "Agent-ready brief", icon: Bot },
-  { label: "No external API", icon: ShieldCheck },
+  { label: "Server-side OpenRouter", icon: ShieldCheck },
   { label: "Vercel build safe", icon: ClipboardCheck },
 ];
 
@@ -31,8 +31,8 @@ const featureCards = [
     icon: Boxes,
   },
   {
-    title: "Tanpa service eksternal",
-    desc: "Generator berjalan lokal di browser dan tidak memerlukan Firebase, OpenAI API, atau secret key.",
+    title: "Fallback lokal aman",
+    desc: "OpenRouter berjalan lewat API Route. Jika env belum ada atau AI gagal, generator lokal tetap menghasilkan PRD.",
     icon: Database,
   },
 ];
@@ -119,7 +119,7 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between rounded-lg border border-white/10 bg-slate-950/45 px-4 py-3 backdrop-blur">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
                 <Radar size={16} className="text-lime-300" />
-                Local generator online
+                AI route + local fallback
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <Braces size={14} className="text-violet-300" />
@@ -139,7 +139,7 @@ export default function Home() {
           <span className="hidden text-slate-700 sm:inline">/</span>
           <span className="inline-flex items-center gap-2">
             <ShieldCheck size={16} className="text-lime-300" />
-            Aman untuk MVP tanpa API key
+            API key hanya di server
           </span>
         </footer>
       </div>
