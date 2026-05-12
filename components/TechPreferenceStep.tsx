@@ -2,6 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Bot, Check, Cpu, SlidersHorizontal } from "lucide-react";
 import type { SelectedTech, TechMode } from "@/lib/generate-prd";
+import type { I18nText } from "@/lib/i18n";
 
 type TechPreferenceStepProps = {
   techMode: TechMode;
@@ -11,6 +12,7 @@ type TechPreferenceStepProps = {
   onBack: () => void;
   onNext: () => void;
   isAnalyzing?: boolean;
+  t: I18nText;
 };
 
 const techOptions = {
@@ -35,17 +37,18 @@ export default function TechPreferenceStep({
   onBack,
   onNext,
   isAnalyzing = false,
+  t,
 }: TechPreferenceStepProps) {
   return (
     <section className="glass-panel overflow-hidden rounded-lg">
       <div className="border-b border-white/10 p-5">
         <div className="flex items-center gap-2 text-xs font-bold uppercase text-cyan-300">
           <Cpu size={16} />
-          Step 2
+          {t.techStep}
         </div>
-        <h2 className="mt-2 text-2xl font-black text-white">Preferensi Teknologi</h2>
+        <h2 className="mt-2 text-2xl font-black text-white">{t.techTitle}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Pilih apakah AI boleh menentukan stack terbaik, atau tentukan stack sendiri untuk PRD akhir.
+          {t.techDescription}
         </p>
       </div>
 
@@ -63,12 +66,12 @@ export default function TechPreferenceStep({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 font-bold">
                 <Bot size={18} />
-                Biarkan AI pilih
+                {t.aiChoose}
               </div>
               {techMode === "ai" ? <Check size={18} className="text-lime-300" /> : null}
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              AI menentukan stack paling cocok berdasarkan domain ide, MVP, dan target deploy.
+              {t.aiChooseDescription}
             </p>
           </button>
 
@@ -84,12 +87,12 @@ export default function TechPreferenceStep({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 font-bold">
                 <SlidersHorizontal size={18} />
-                Pilih sendiri
+                {t.manualChoose}
               </div>
               {techMode === "manual" ? <Check size={18} className="text-lime-300" /> : null}
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              User memilih frontend, backend, database, dan deployment yang ingin dipakai.
+              {t.manualChooseDescription}
             </p>
           </button>
         </div>
@@ -98,13 +101,13 @@ export default function TechPreferenceStep({
           <div className="grid gap-4 rounded-lg border border-white/10 bg-slate-950/45 p-4 sm:grid-cols-2">
             {fields.map((field) => (
               <label key={field.key} className="block">
-                <span className="text-sm font-bold text-slate-200">{field.label}</span>
+                <span className="text-sm font-bold text-slate-200">{t[field.key]}</span>
                 <select
                   value={selectedTech[field.key] || ""}
                   onChange={(event) => onTechChange(field.key, event.target.value)}
                   className="mt-2 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/10"
                 >
-                  <option value="">Pilih {field.label}</option>
+                  <option value="">{t.choose} {t[field.key]}</option>
                   {techOptions[field.key].map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -116,8 +119,7 @@ export default function TechPreferenceStep({
           </div>
         ) : (
           <div className="rounded-lg border border-cyan-300/15 bg-cyan-300/10 p-4 text-sm leading-6 text-cyan-50">
-            Rekomendasi stack otomatis akan ditulis di PRD. Untuk MVP awal, generator tetap menghindari API eksternal,
-            secret key, dan service yang wajib dikonfigurasi.
+            {t.autoStackNote}
           </div>
         )}
 
@@ -128,7 +130,7 @@ export default function TechPreferenceStep({
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/10 px-5 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
           >
             <ArrowLeft size={18} />
-            Kembali
+            {t.back}
           </button>
 
           <button
@@ -137,7 +139,7 @@ export default function TechPreferenceStep({
             disabled={isAnalyzing}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-cyan-300 via-lime-200 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-neon transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isAnalyzing ? "Menganalisis ide..." : "Lanjut"}
+            {isAnalyzing ? t.analyzing : t.next}
             <ArrowRight size={18} />
           </button>
         </div>

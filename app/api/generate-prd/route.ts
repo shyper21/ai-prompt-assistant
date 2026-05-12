@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildGeneratePrdPrompt } from "@/lib/ai-prompts";
 import { generatePRD, type GeneratePRDInput } from "@/lib/generate-prd";
+import type { AppLanguage } from "@/lib/i18n";
 import { callOpenRouter, hasOpenRouterConfig } from "@/lib/openrouter";
 
 function isValidInput(value: Partial<GeneratePRDInput>): value is GeneratePRDInput {
@@ -8,6 +9,7 @@ function isValidInput(value: Partial<GeneratePRDInput>): value is GeneratePRDInp
     typeof value.idea === "string" &&
     (value.techMode === "ai" || value.techMode === "manual") &&
     typeof value.selectedTech === "object" &&
+    value.selectedTech !== null &&
     Array.isArray(value.answers)
   );
 }
@@ -31,21 +33,42 @@ function prdBodyHasEnglishSentences(markdown: string) {
   return englishBodyPatterns.some((pattern) => pattern.test(body));
 }
 
+const indonesianBodyPatterns = [
+  /\badalah\b/i,
+  /\bpengguna\b/i,
+  /\baplikasi\b/i,
+  /\bfitur\b/i,
+  /\bdata utama\b/i,
+  /\bwajib\b/i,
+  /\bdibutuhkan\b/i,
+];
+
+function prdBodyHasIndonesianSentences(markdown: string) {
+  return indonesianBodyPatterns.some((pattern) => pattern.test(markdown));
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<GeneratePRDInput>;
+    const language: AppLanguage = body.language === "en" ? "en" : "id";
 
     if (!isValidInput(body) || !body.idea.trim()) {
-      return NextResponse.json({ error: "Input generate PRD tidak valid." }, { status: 400 });
+      return NextResponse.json(
+        { error: language === "id" ? "Input generate PRD tidak valid." : "Invalid PRD generation input." },
+        { status: 400 },
+      );
     }
 
-    const localPrd = generatePRD(body);
+    const localPrd = generatePRD({ ...body, language });
 
     if (!hasOpenRouterConfig()) {
       return NextResponse.json({
         source: "local",
         fallback: true,
-        reason: "OPENROUTER_API_KEY belum dikonfigurasi. Generator lokal digunakan.",
+        reason:
+          language === "id"
+            ? "OPENROUTER_API_KEY belum dikonfigurasi. Generator lokal digunakan."
+            : "OPENROUTER_API_KEY is not configured. Local generator was used.",
         prd: localPrd,
       });
     }
@@ -58,20 +81,31 @@ export async function POST(request: Request) {
           {
             role: "system",
             content:
-              "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. Write all PRD content in Bahasa Indonesia, except the final AI Coding Agent prompt, which may be in English.",
+              language === "id"
+                ? "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. User selected Bahasa Indonesia. All PRD content must be written in Bahasa Indonesia. Do not mix English and Indonesian. Only the final AI Coding Agent prompt may be written in English."
+                : "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. User selected English. All PRD content must be written in English. Do not use Indonesian sentences.",
           },
           {
             role: "user",
-            content: buildGeneratePrdPrompt(body, localPrd),
+            content: buildGeneratePrdPrompt({ ...body, language }, localPrd),
           },
         ],
       });
 
-      if (prdBodyHasEnglishSentences(prd)) {
+      if (language === "id" && prdBodyHasEnglishSentences(prd)) {
         return NextResponse.json({
           source: "local",
           fallback: true,
           reason: "Output OpenRouter terdeteksi mencampur kalimat Bahasa Inggris di luar prompt akhir. Generator lokal digunakan.",
+          prd: localPrd,
+        });
+      }
+
+      if (language === "en" && prdBodyHasIndonesianSentences(prd)) {
+        return NextResponse.json({
+          source: "local",
+          fallback: true,
+          reason: "OpenRouter output mixed Indonesian text into the English PRD. Local generator was used.",
           prd: localPrd,
         });
       }
@@ -85,7 +119,10 @@ export async function POST(request: Request) {
       return NextResponse.json({
         source: "local",
         fallback: true,
-        reason: "Request OpenRouter gagal. Generator lokal digunakan.",
+        reason:
+          language === "id"
+            ? "Request OpenRouter gagal. Generator lokal digunakan."
+            : "OpenRouter request failed. Local generator was used.",
         prd: localPrd,
       });
     }

@@ -1,6 +1,11 @@
 import { Menu, Sparkles, Zap } from "lucide-react";
+import type { I18nText } from "@/lib/i18n";
 
-export default function Navbar() {
+type NavbarProps = {
+  t: I18nText;
+};
+
+export default function Navbar({ t }: NavbarProps) {
   return (
     <header className="relative z-20 mx-auto flex h-[76px] w-full max-w-7xl items-center justify-between px-5 sm:px-7">
       <div className="flex items-center gap-4">
@@ -20,7 +25,7 @@ export default function Navbar() {
               PromptForge<span className="text-cyan-300"> AI</span>
             </div>
             <div className="-mt-1 hidden text-[11px] uppercase text-slate-500 sm:block">
-              build ready prompts
+              {t.chipAgentReady}
             </div>
           </div>
         </div>
@@ -32,7 +37,7 @@ export default function Navbar() {
         </span>
         <button className="group hidden items-center gap-2 rounded-md border border-cyan-300/30 bg-cyan-300/10 px-4 py-2.5 text-sm font-bold text-cyan-100 transition hover:bg-cyan-300/20 sm:inline-flex">
           <Zap size={16} className="transition group-hover:rotate-12" />
-          Generate
+          {t.generatePrd}
         </button>
         <div className="grid h-10 w-10 place-items-center rounded-md border border-white/10 bg-gradient-to-br from-slate-700 to-slate-900 text-sm font-black text-slate-100">
           J

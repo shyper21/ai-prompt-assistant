@@ -1,3 +1,5 @@
+import type { AppLanguage } from "@/lib/i18n";
+
 export type TechMode = "ai" | "manual";
 
 export type SelectedTech = {
@@ -14,6 +16,8 @@ export type PrdAnswer = {
 
 export type GeneratePRDInput = {
   idea: string;
+  language?: AppLanguage;
+  domain?: ProjectDomain;
   techMode: TechMode;
   selectedTech: SelectedTech;
   answers: PrdAnswer[];
@@ -29,6 +33,7 @@ export type ProjectDomain =
   | "content-management"
   | "e-commerce"
   | "saas-dashboard"
+  | "ai-agent"
   | "generic-web-app";
 
 type CoreFeature = {
@@ -91,6 +96,65 @@ const genericChips = [
   ["Lebih cepat", "Lebih rapi", "Lebih mudah dipantau"],
   ["Reminder", "Insight berkala", "Riwayat lengkap"],
 ];
+
+const englishQuestionsByDomain: Record<ProjectDomain, { questions: string[]; chips: string[][] }> = {
+  "finance-tracker": {
+    questions: [
+      "Is this tracker for personal use, family use, freelancers, or a small business?",
+      "What data should be recorded: income, expenses, debt, bills, budgets, or opening balance?",
+      "Do users need transaction categories and budgets per category?",
+      "Which reports matter most: daily, weekly, monthly, or category-based reports?",
+      "Do users need report export, bill reminders, or budget alerts?",
+    ],
+    chips: [["Personal", "Family", "Freelancer", "Small business"], ["Income", "Expenses", "Debt", "Bills", "Opening balance"], ["Required categories", "Budget per category", "Default categories"], ["Monthly chart", "Category report", "Balance trend"], ["CSV export", "Bill reminder", "Budget alert"]],
+  },
+  inventory: {
+    questions: [
+      "Is this inventory for a small store, warehouse, production, or distribution workflow?",
+      "Do you need batch numbers, expiry dates, SKUs, barcodes, or serial numbers?",
+      "Will stock in and stock out be recorded manually or from orders?",
+      "Do you need shelf locations, branch warehouses, or multi-location stock?",
+      "Do you need low stock alerts and single-admin or multi-admin access?",
+    ],
+    chips: [["Small store", "Warehouse", "Production", "Distribution"], ["Batch number", "Expiry date", "SKU", "Barcode"], ["Manual", "From orders", "CSV import"], ["Shelf location", "Multiple warehouses", "Branches"], ["Low stock alert", "Single admin", "Multiple admins"]],
+  },
+  "booking-system": {
+    questions: ["What service will users book and how long does each service take?", "Should booking use date, time, staff, or location selection?", "Are bookings confirmed automatically or reviewed by an admin?", "Which statuses are needed?", "Do you need reminders, deposits, payments, or customer notes?"],
+    chips: [["Appointment", "Rental", "Class", "Consultation"], ["Date", "Time", "Staff", "Location"], ["Auto confirmed", "Admin approval", "Waitlist"], ["Pending", "Confirmed", "Completed", "Cancelled"], ["Reminder", "Deposit", "Payment note", "Customer notes"]],
+  },
+  "learning-app": {
+    questions: ["Who are the learners: children, school students, employees, or a community?", "What content format is needed: text, video, quizzes, flashcards, or assignments?", "Do you need progress tracking, scoring, certificates, or leaderboard?", "Is there a teacher or mentor role for feedback?", "What keeps learners coming back every day?"],
+    chips: [["Children", "Students", "Employees", "Community"], ["Text", "Video", "Quiz", "Flashcards"], ["Progress", "Scoring", "Certificate", "Leaderboard"], ["Teacher", "Mentor", "Self-paced"], ["Streak", "Reminder", "Badge", "Daily target"]],
+  },
+  "crm-sales": {
+    questions: ["Who will use this CRM: founder, solo salesperson, or sales team?", "What pipeline stages are needed from lead to close?", "What lead data must be stored?", "Do you need follow-up reminders and activity logs?", "Which sales report matters most?"],
+    chips: [["Founder", "Solo sales", "Sales team"], ["New", "Qualified", "Proposal", "Won/Lost"], ["Contact", "Company", "Source", "Deal value"], ["Follow-up reminder", "Activity log", "Email note"], ["Conversion", "Forecast", "Source report", "Deal value"]],
+  },
+  "task-management": {
+    questions: ["Is this for personal tasks, a small team, or multiple projects?", "Which workflow statuses are needed?", "Do you need assignees, deadlines, priorities, tags, or subtasks?", "Do users need Kanban, list, calendar, or all views?", "Which report matters most?"],
+    chips: [["Personal", "Small team", "Multiple projects"], ["Todo", "Doing", "Review", "Done", "Blocked"], ["Assignee", "Deadline", "Priority", "Subtasks"], ["Kanban", "List", "Calendar"], ["Overdue", "Workload", "Completion rate"]],
+  },
+  "content-management": {
+    questions: ["What content will be managed: blog posts, articles, landing pages, docs, or social content?", "Which editorial workflow is needed?", "Will there be multiple authors/editors or a single admin?", "Do you need categories, tags, SEO fields, and revision history?", "Will publishing happen inside the app or is it internal management only?"],
+    chips: [["Blog", "Articles", "Documentation", "Social content"], ["Draft", "Review", "Scheduled", "Published"], ["Single admin", "Multiple authors", "Editor approval"], ["SEO fields", "Tags", "Revision history"], ["Publish directly", "Internal only", "Export content"]],
+  },
+  "e-commerce": {
+    questions: ["Are the products physical, digital, services, or mixed?", "Do you need online payment now or manual orders first?", "Do products need variants such as size, color, package, or variant stock?", "Which order statuses are needed?", "Does admin need catalog, stock, promo, and sales reports?"],
+    chips: [["Physical", "Digital", "Service", "Mixed"], ["Manual order", "Payment later", "Payment gateway later"], ["Size", "Color", "Package", "Variant stock"], ["Pending", "Paid", "Shipped", "Completed"], ["Catalog", "Stock", "Promo", "Sales report"]],
+  },
+  "saas-dashboard": {
+    questions: ["What metrics should this dashboard monitor?", "Is this multi-tenant, single workspace, or internal only?", "Which user roles are needed?", "Will metrics be entered manually first or imported later?", "Which report and alert are most important?"],
+    chips: [["Revenue", "Users", "Operations", "Marketing", "Support"], ["Multi-tenant", "Single workspace", "Internal dashboard"], ["Owner", "Admin", "Member", "Viewer"], ["Manual input", "CSV import", "API later"], ["Weekly report", "Anomaly alert", "Target tracking"]],
+  },
+  "ai-agent": {
+    questions: ["What daily activities should this AI agent help with?", "Should the agent only suggest actions or execute actions automatically?", "What data sources can the agent access?", "Does the agent need long-term memory?", "What integrations are required?"],
+    chips: [["Research", "Administration", "Data analysis", "Customer support"], ["Suggestions only", "Actions with approval", "Limited automatic actions"], ["Documents", "Email", "CRM", "Internal database"], ["No memory", "Per-user memory", "Per-project memory"], ["Google Drive", "Slack", "Email", "Internal API"]],
+  },
+  "generic-web-app": {
+    questions: genericQuestions.map((_, index) => ["Who needs this application and how do they solve the process today?", "What must users successfully do on their first visit?", "Which features are required in the first version?", "What makes this app easier than the old workflow?", "What makes users return repeatedly?"][index]),
+    chips: [["Small business owner", "Internal team", "Personal user"], ["Create first data", "View dashboard", "Find old data"], ["Dashboard", "CRUD data", "Search/filter", "Export"], ["Faster", "Cleaner", "Easier to monitor"], ["Reminder", "Recurring insight", "Complete history"]],
+  },
+};
 
 function cleanText(text: string) {
   return text.replace(/[\n\r]+/g, " ").replace(/\s+/g, " ").trim();
@@ -232,6 +296,10 @@ export function detectProjectDomain(idea: string): ProjectDomain {
 
   if (includesAny(lower, ["ecommerce", "e-commerce", "toko online", "checkout", "cart", "keranjang", "produk", "order"])) {
     return "e-commerce";
+  }
+
+  if (includesAny(lower, ["ai agent", "agent ai", "agen ai", "assistant", "asisten ai", "automation agent", "copilot"])) {
+    return "ai-agent";
   }
 
   if (includesAny(lower, ["saas", "dashboard", "analytics", "metric", "subscription", "tenant", "admin panel"])) {
@@ -616,6 +684,47 @@ function getDomainProfile(domain: ProjectDomain, idea: string): DomainProfile {
       acceptance: ["Dashboard menampilkan minimal 4 KPI.", "User bisa menambah metric.", "User bisa mengubah target/threshold.", "User bisa filter berdasarkan periode.", "Report dasar tersedia.", "Role list tersedia walau auth masih demo.", "Activity log tercatat.", "Build deployable ke Vercel."],
       designTone: "SaaS admin yang profesional, padat, dan mudah dipindai, dengan hierarchy data yang kuat.",
     },
+    "ai-agent": {
+      domain,
+      label: "AI Agent",
+      projectName: "Asisten AI Operasional",
+      primaryEntity: "agent_tasks",
+      primaryEntityLabel: "tugas agent",
+      activityEntity: "agent_runs",
+      settingsEntity: "agent_settings",
+      targetUsers: ["Pemilik bisnis", "Tim operasional", "Knowledge worker", "Admin internal"],
+      roles: ["Pengguna", "Admin", "Reviewer"],
+      inputMethods: ["Instruksi pengguna", "Sumber data terhubung", "Approval manual", "Feedback hasil agent"],
+      storedData: ["tugas agent", "riwayat eksekusi", "memory", "integrasi", "izin akses", "feedback pengguna"],
+      notifications: "Peringatan saat agent membutuhkan approval, gagal menjalankan aksi, atau menemukan risiko pada data.",
+      pages: ["Dashboard Agent", "Buat Tugas", "Riwayat Eksekusi", "Memory", "Integrasi", "Approval Queue", "Pengaturan"],
+      questions: [
+        "AI agent ini paling sering membantu aktivitas apa?",
+        "Agent hanya memberi saran atau boleh menjalankan aksi otomatis?",
+        "Data apa yang boleh dibaca oleh agent?",
+        "Apakah agent perlu memory jangka panjang?",
+        "Integrasi apa yang dibutuhkan?",
+      ],
+      chips: [
+        ["Riset", "Administrasi", "Analisis data", "Customer support"],
+        ["Hanya saran", "Aksi dengan approval", "Aksi otomatis terbatas"],
+        ["Dokumen", "Email", "CRM", "Database internal"],
+        ["Tidak perlu", "Memory per user", "Memory per project"],
+        ["Google Drive", "Slack", "Email", "API internal"],
+      ],
+      features: [
+        createFeature("Dashboard Agent", "Menampilkan tugas aktif, eksekusi terakhir, status approval, dan risiko yang perlu ditinjau.", "Tugas agent, status eksekusi, izin akses.", "Ringkasan operasional agent dan prioritas tindakan.", "Dashboard harus menjelaskan apa yang sedang dilakukan agent."),
+        createFeature("Pembuatan Tugas Agent", "Pengguna dapat membuat tugas dengan tujuan, konteks, batasan, dan hasil yang diharapkan.", "Instruksi, sumber data, batasan aksi, format output.", "Tugas agent tersimpan dan siap diproses.", "Instruksi harus divalidasi agar tidak terlalu ambigu."),
+        createFeature("Approval dan Kontrol Aksi", "Agent dapat meminta persetujuan sebelum menjalankan aksi berisiko.", "Permintaan approval, alasan, ringkasan dampak.", "Keputusan approve/reject dan catatan reviewer.", "Aksi otomatis harus dibatasi oleh permission."),
+        createFeature("Memory Agent", "Sistem menyimpan preferensi dan konteks penting sesuai izin pengguna.", "Key memory, scope, sumber, tanggal update.", "Memory yang bisa dipakai untuk tugas berikutnya.", "Memory harus bisa dilihat, diedit, dan dihapus."),
+        createFeature("Integrasi Data", "Admin dapat mengatur sumber data yang boleh dibaca agent.", "Jenis integrasi, permission, status koneksi.", "Daftar integrasi aktif dan batas akses.", "MVP dapat memakai data dummy tanpa koneksi sungguhan."),
+        createFeature("Riwayat Eksekusi", "Semua hasil dan keputusan agent tersimpan sebagai audit trail.", "Run log, input, output, status, feedback.", "Timeline eksekusi dan evaluasi kualitas.", "Audit penting untuk trust dan debugging."),
+      ],
+      flow: ["Pengguna masuk ke dashboard agent.", "Pengguna membuat tugas baru untuk agent.", "Sistem memvalidasi instruksi dan sumber data.", "Agent menyiapkan hasil atau meminta approval.", "Pengguna meninjau hasil dan memberi feedback.", "Jika disetujui, aksi dijalankan sesuai batasan.", "Riwayat eksekusi dan memory diperbarui.", "Admin mengelola integrasi dan permission."],
+      apiActions: ["createAgentTask(data)", "runAgentTask(id)", "approveAgentAction(id, decision)", "getAgentRuns(filters)", "saveAgentMemory(data)", "deleteAgentMemory(id)", "getIntegrations(userId)", "createAgentFeedback(data)"],
+      acceptance: ["Pengguna bisa membuat tugas agent.", "Agent task memiliki status yang jelas.", "Aksi berisiko membutuhkan approval.", "Memory bisa dilihat dan dihapus.", "Riwayat eksekusi tersimpan.", "Integrasi dummy bisa dikonfigurasi.", "Feedback pengguna bisa dicatat.", "Tidak ada API key yang terekspos di frontend."],
+      designTone: "UI agent yang transparan, menjelaskan status, izin, risiko, dan hasil dengan bahasa yang mudah dipahami.",
+    },
     "generic-web-app": {
       domain,
       label: "Generic Web App",
@@ -649,11 +758,19 @@ function getDomainProfile(domain: ProjectDomain, idea: string): DomainProfile {
   return profiles[domain];
 }
 
-export function getDynamicQuestions(domain: ProjectDomain) {
+export function getDynamicQuestions(domain: ProjectDomain, language: AppLanguage = "id") {
+  if (language === "en") {
+    return englishQuestionsByDomain[domain].questions;
+  }
+
   return getDomainProfile(domain, "").questions.map(normalizeUserFacingText);
 }
 
-export function getDynamicQuestionChips(domain: ProjectDomain) {
+export function getDynamicQuestionChips(domain: ProjectDomain, language: AppLanguage = "id") {
+  if (language === "en") {
+    return englishQuestionsByDomain[domain].chips;
+  }
+
   return getDomainProfile(domain, "").chips.map((group) => group.map(normalizeUserFacingText));
 }
 
@@ -816,6 +933,14 @@ export function generateDatabaseSchema(domain: ProjectDomain, idea: string): Dat
       { name: "metrics", description: "Metric/KPI yang dipantau.", fields: ["id int PK", "workspace_id int FK", "name string", "value decimal", "target decimal", "period date", "created_at datetime"] },
       { name: "workspace_members", description: "User dan role dalam workspace.", fields: ["id int PK", "workspace_id int FK", "user_id int FK", "role string", "created_at datetime"] },
       activity,
+      settings,
+    ],
+    "ai-agent": [
+      baseUsers,
+      { name: "agent_tasks", description: "Tugas yang diminta pengguna kepada agent.", fields: ["id int PK", "user_id int FK", "title string", "instruction text", "status string", "risk_level string", "created_at datetime", "updated_at datetime"] },
+      { name: "agent_runs", description: "Riwayat eksekusi agent dan hasilnya.", fields: ["id int PK", "agent_task_id int FK", "status string", "input_json string", "output_text text", "error_message text", "created_at datetime"] },
+      { name: "agent_memories", description: "Memory jangka panjang sesuai izin pengguna.", fields: ["id int PK", "user_id int FK", "scope string", "key string", "value text", "source string", "updated_at datetime"] },
+      { name: "agent_integrations", description: "Daftar sumber data atau integrasi yang boleh diakses agent.", fields: ["id int PK", "user_id int FK", "provider string", "permission string", "status string", "created_at datetime"] },
       settings,
     ],
     "generic-web-app": [
@@ -1076,13 +1201,174 @@ IMPLEMENTATION INSTRUCTIONS:
 6. Run npm run build.
 7. Summarize files changed and important implementation decisions.
 
-Detected domain: ${domain}
+  Detected domain: ${domain}
 \`\`\``;
+}
+
+function generateEnglishPRD(input: GeneratePRDInput, domain: ProjectDomain) {
+  const idea = cleanText(input.idea);
+  const tech = getFinalStack(input, domain);
+  const tables = generateDatabaseSchema(domain, idea);
+  const domainLabel = domain.replace(/-/g, " ");
+  const projectName =
+    domain === "finance-tracker"
+      ? "Daily Finance Tracker"
+      : domain === "inventory"
+        ? "Warehouse Stock Control"
+        : domain === "booking-system"
+          ? "Service Booking Hub"
+          : domain === "ai-agent"
+            ? "Operational AI Agent"
+            : `${titleCase(idea) || "Smart Product"} App`;
+  const answeredContext = input.answers
+    .filter((answer) => answer.answer.trim())
+    .map((answer, index) => `${index + 1}. ${answer.question}\n   Answer: ${answer.answer}`)
+    .join("\n");
+  const featureNames =
+    domain === "finance-tracker"
+      ? ["Financial Dashboard", "Transaction Management", "Categories and Budgets", "Bills and Reminders", "Monthly Reports", "Report Export"]
+      : domain === "inventory"
+        ? ["Inventory Dashboard", "Product Management", "Stock In and Stock Out", "Batch and Location Tracking", "Low Stock Alerts", "Stock History"]
+        : domain === "ai-agent"
+          ? ["Agent Dashboard", "Agent Task Creation", "Approval and Action Control", "Agent Memory", "Data Integrations", "Execution History"]
+          : ["Main Dashboard", "Core Data Management", "Detail and History", "Search and Filters", "Reports and Export", "Settings"];
+
+  return `# PRD — Project Requirements Document
+
+## Project Name
+${projectName}
+
+## 1. Overview
+${projectName} is a ${domainLabel} web application based on this idea:
+
+> ${idea}
+
+The product replaces scattered manual workflows with a structured web application. The goal is to help users enter core data, monitor status, review history, and make decisions from one dashboard. The MVP should be practical, responsive, and usable without requiring external services at the start.
+
+Additional context from user answers:
+${answeredContext || "- No additional answers were provided."}
+
+## 2. Requirements
+- **Platform:** Responsive web browser experience for desktop and mobile.
+- **Users:** Primary users, admins, and operational team members depending on the selected domain.
+- **Roles:** Demo user, admin, and member roles for MVP planning.
+- **Data Input:** Manual forms, filters, status updates, notes, and report actions.
+- **Stored Data:** Users, core domain records, activity history, settings, and report data.
+- **Notifications:** Visual dashboard alerts for important events, risks, reminders, or overdue items.
+- **MVP Limits:** Start with local or dummy data. Do not require external APIs, payment gateways, or secret keys.
+- **Security:** Validate input, keep secrets out of frontend code, and prepare ownership rules for future authentication.
+- **Recommended Stack:** Frontend ${tech.frontend}, backend ${tech.backend}, database ${tech.database}, deployment ${tech.deployment}.
+
+## 3. Core Features
+${featureNames
+  .map(
+    (name, index) => `### 3.${index + 1} ${name}
+- **Description:** Provides the main capability needed for the ${domainLabel} workflow.
+- **Input:** User-entered data, filters, status, notes, and domain-specific fields.
+- **Output:** Updated dashboard, saved records, clear feedback, and useful history.
+- **Notes:** Keep the MVP focused, validated, responsive, and easy for non-technical users.`,
+  )
+  .join("\n\n")}
+
+## 4. User Flow
+1. User opens the application.
+2. User logs in or enters demo mode.
+3. User views the dashboard and current status.
+4. User creates the main domain record.
+5. User validates and saves the form.
+6. User reviews the record in a list and detail page.
+7. User edits, deletes, filters, or updates status.
+8. User checks history, reports, and exports when relevant.
+
+## 5. Architecture
+The application uses a simple web architecture. The frontend handles forms and interface state, the backend/API validates requests, and the database stores users, domain records, settings, and activity logs.
+
+\`\`\`mermaid
+sequenceDiagram
+    participant User as User Browser
+    participant UI as Frontend
+    participant API as Backend/API
+    participant DB as Database
+
+    User->>UI: Submit form or action
+    UI->>API: Send validated request
+    API->>API: Validate rules and permissions
+    API->>DB: Save record and activity log
+    DB-->>API: Return saved result
+    API-->>UI: Return success or validation error
+    UI-->>User: Update dashboard and list
+\`\`\`
+
+## 6. Database Schema
+\`\`\`mermaid
+erDiagram
+${tables
+  .map(
+    (table) => `    ${table.name} {
+${table.fields.map((field) => `        ${field}`).join("\n")}
+    }`,
+  )
+  .join("\n\n")}
+\`\`\`
+
+| Table | Description |
+| --- | --- |
+${tables.map((table) => `| ${table.name} | Stores ${table.name.replace(/_/g, " ")} data for the application. |`).join("\n")}
+
+## 7. Design & Technical Constraints
+- **UI Style:** Clean, modern, dashboard-focused, and easy to scan.
+- **Typography:** Use readable sans-serif typography with clear hierarchy.
+- **Responsive Design:** Support mobile, tablet, and desktop layouts.
+- **Accessibility:** Use labels, visible focus states, clear contrast, and keyboard-friendly controls.
+- **Performance:** Keep dependencies minimal and avoid external requests in the MVP.
+- **Security:** Validate input, protect user-owned data, and never expose API keys in frontend code.
+- **Deployment:** Deploy to ${tech.deployment}.
+
+## 8. API Specification
+\`\`\`ts
+createRecord(data)
+updateRecord(id, data)
+deleteRecord(id)
+getRecords(filters)
+getRecordById(id)
+getDashboardSummary(filters)
+createActivityLog(data)
+exportRecords(filters)
+\`\`\`
+
+## 9. Acceptance Criteria
+- [ ] User can enter demo mode or log in.
+- [ ] User can create the main record.
+- [ ] User can view dashboard metrics.
+- [ ] User can edit and delete records.
+- [ ] User can search and filter data.
+- [ ] Activity history is available.
+- [ ] UI is responsive on mobile and desktop.
+- [ ] Input validation works.
+- [ ] Production build passes.
+- [ ] No API key is exposed in frontend code.
+
+## 10. Prompt for AI Coding Agent
+\`\`\`text
+Build a complete production-ready web application based on this PRD.
+
+Use this stack:
+- Frontend: ${tech.frontend}
+- Backend/API: ${tech.backend}
+- Database: ${tech.database}
+- Deployment: ${tech.deployment}
+
+Build real usable pages, not only a landing page. Include dashboard, CRUD forms, lists, detail pages, settings, validation, loading states, error states, success feedback, dummy/local data fallback, and responsive UI. Do not expose API keys. Run npm run build and fix all TypeScript/build errors before finishing.
+\`\`\`
+`;
 }
 
 export function generatePRD(input: GeneratePRDInput) {
   const idea = cleanText(input.idea);
-  const domain = detectProjectDomain(idea);
+  const domain = input.domain || detectProjectDomain(idea);
+  if (input.language === "en") {
+    return generateEnglishPRD(input, domain);
+  }
   const profile = getDomainProfile(domain, idea);
   const tech = getFinalStack(input, domain);
   const tables = generateDatabaseSchema(domain, idea);
@@ -1117,8 +1403,8 @@ ${answeredContext}
 - **Notifikasi/Alert:** ${profile.notifications}
 - **Batasan MVP:** Buat MVP usable dengan dummy/local data terlebih dahulu. Jangan gunakan API eksternal, Firebase, OpenAI API, payment gateway, atau secret key pada versi awal.
 - **Security:** Login/demo mode, validasi input, ownership data per user/workspace, sanitasi text output, dan tidak mengekspos secret di frontend.
-- **Tech Preference Mode:** ${input.techMode === "ai" ? "Biarkan AI pilih" : "Pilih sendiri"}.
-- **Recommended Stack:** Frontend ${tech.frontend}, Backend ${tech.backend}, Database ${tech.database}, Deployment ${tech.deployment}.
+- **Mode Preferensi Teknologi:** ${input.techMode === "ai" ? "Biarkan AI pilih" : "Pilih sendiri"}.
+- **Stack Rekomendasi:** Frontend ${tech.frontend}, backend ${tech.backend}, database ${tech.database}, deployment ${tech.deployment}.
 - **Alasan Stack:** ${tech.reason}
 
 ## 3. Core Features
@@ -1134,15 +1420,15 @@ ${renderArchitecture(profile)}
 ${renderErd(tables, profile)}
 
 ## 7. Design & Technical Constraints
-- **Style UI:** ${profile.designTone}
+- **Gaya UI:** ${profile.designTone}
 - **Typography:** Gunakan font sans-serif modern, heading jelas, body text nyaman, dan spacing konsisten.
 - **Warna:** Gunakan palet dark/neutral atau clean light sesuai produk, dengan warna status yang jelas untuk success, warning, danger, dan info.
-- **Responsive Design:** Semua halaman harus nyaman di mobile 360px, tablet, dan desktop.
+- **Desain Responsif:** Semua halaman harus nyaman di mobile 360px, tablet, dan desktop.
 - **Accessibility:** Setiap input punya label, focus state terlihat, kontras cukup, tombol punya teks jelas, dan flow bisa dipakai keyboard.
 - **Performance:** Minimalkan dependency, hindari request eksternal pada MVP, gunakan component sederhana, dan pastikan data dummy tidak membuat UI lambat.
 - **Security:** Validasi input di client dan server layer, pisahkan data per user/workspace, jangan expose API key, dan siapkan .env.example hanya jika service eksternal ditambahkan nanti.
-- **Deployment Target:** ${tech.deployment}.
-- **Recommended Implementation:** ${tech.frontend}, ${tech.backend}, ${tech.database}, dan TypeScript.
+- **Target Deployment:** ${tech.deployment}.
+- **Implementasi Rekomendasi:** ${tech.frontend}, ${tech.backend}, ${tech.database}, dan TypeScript.
 
 ## 8. API Specification / Server Actions
 ${renderApiSpec(profile, tech.backend)}

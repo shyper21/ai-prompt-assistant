@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import {
   Bot,
   Boxes,
@@ -12,44 +15,59 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import PRDWizard from "@/components/PRDWizard";
-
-const chips = [
-  { label: "Agent-ready brief", icon: Bot },
-  { label: "Server-side OpenRouter", icon: ShieldCheck },
-  { label: "Vercel build safe", icon: ClipboardCheck },
-];
-
-const featureCards = [
-  {
-    title: "Prompt untuk coding agent",
-    desc: "Output dibuat seperti instruksi kerja untuk Codex, Claude Code, ChatGPT, Gemini, atau agent lain.",
-    icon: Code2,
-  },
-  {
-    title: "Blueprint produk lengkap",
-    desc: "Mencakup masalah, user flow, MVP, struktur halaman, schema, API, dan acceptance criteria.",
-    icon: Boxes,
-  },
-  {
-    title: "Fallback lokal aman",
-    desc: "OpenRouter berjalan lewat API Route. Jika env belum ada atau AI gagal, generator lokal tetap menghasilkan PRD.",
-    icon: Database,
-  },
-];
-
-const telemetry = [
-  { label: "Wizard", value: "4 steps" },
-  { label: "Sections", value: "10" },
-  { label: "Target", value: "AI agents" },
-];
+import { getDictionary, type AppLanguage } from "@/lib/i18n";
 
 export default function Home() {
+  const [language, setLanguage] = useState<AppLanguage>("id");
+  const t = useMemo(() => getDictionary(language), [language]);
+
+  useEffect(() => {
+    const savedLanguage = window.localStorage.getItem("promptforge.language");
+    if (savedLanguage === "id" || savedLanguage === "en") {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("promptforge.language", language);
+  }, [language]);
+
+  const chips = [
+    { label: t.chipAgentReady, icon: Bot },
+    { label: t.chipOpenRouter, icon: ShieldCheck },
+    { label: t.chipVercel, icon: ClipboardCheck },
+  ];
+
+  const featureCards = [
+    {
+      title: t.featurePromptTitle,
+      desc: t.featurePromptDesc,
+      icon: Code2,
+    },
+    {
+      title: t.featureBlueprintTitle,
+      desc: t.featureBlueprintDesc,
+      icon: Boxes,
+    },
+    {
+      title: t.featureFallbackTitle,
+      desc: t.featureFallbackDesc,
+      icon: Database,
+    },
+  ];
+
+  const telemetry = [
+    { label: t.telemetryWizard, value: language === "id" ? "4 langkah" : "4 steps" },
+    { label: t.telemetrySections, value: "10" },
+    { label: t.telemetryTarget, value: t.telemetryAgents },
+  ];
+
   return (
     <main className="site-shell relative min-h-screen overflow-hidden bg-void text-slate-100">
       <div className="grid-overlay" />
       <div className="scanline-overlay" />
       <div className="relative z-10">
-        <Navbar />
+        <Navbar t={t} />
 
         <section className="mx-auto grid w-full max-w-7xl gap-10 px-4 pb-14 pt-7 sm:px-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(440px,1.08fr)] lg:px-8 lg:pb-20 lg:pt-12">
           <div className="flex min-w-0 flex-col justify-center">
@@ -74,13 +92,11 @@ export default function Home() {
               </div>
 
               <h1 className="max-w-4xl text-4xl font-black text-white sm:text-5xl lg:text-6xl">
-                Buat PRD lengkap yang siap diberikan ke AI coding agent.
+                {t.headline}
               </h1>
 
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-                PromptForge memandu user non-teknis lewat wizard: ide, preferensi teknologi,
-                pertanyaan tambahan, lalu output Markdown panjang untuk ChatGPT, Claude,
-                Gemini, Codex, atau Claude Code.
+                {t.subtitle}
               </p>
             </div>
 
@@ -119,27 +135,27 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between rounded-lg border border-white/10 bg-slate-950/45 px-4 py-3 backdrop-blur">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
                 <Radar size={16} className="text-lime-300" />
-                API AI + fallback lokal
+                {t.statusAiFallback}
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <Braces size={14} className="text-violet-300" />
-                Markdown output
+                {t.markdownOutput}
               </div>
             </div>
 
-            <PRDWizard />
+            <PRDWizard language={language} setLanguage={setLanguage} t={t} />
           </div>
         </section>
 
         <footer className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-center gap-3 px-5 pb-8 text-sm text-slate-500">
           <span className="inline-flex items-center gap-2">
             <FileText size={16} className="text-cyan-300" />
-            Brief produk, bukan PRD pendek
+            {t.footerBrief}
           </span>
           <span className="hidden text-slate-700 sm:inline">/</span>
           <span className="inline-flex items-center gap-2">
             <ShieldCheck size={16} className="text-lime-300" />
-            API key hanya di server
+            {t.footerSecure}
           </span>
         </footer>
       </div>

@@ -14,15 +14,16 @@ import {
   type SelectedTech,
   type TechMode,
 } from "@/lib/generate-prd";
+import type { AppLanguage, I18nText } from "@/lib/i18n";
 import { savePrdMemory } from "@/lib/prd-memory";
 
 type WizardStep = "idea" | "tech" | "questions" | "result";
 
-const stepItems: Array<{ id: WizardStep; label: string }> = [
-  { id: "idea", label: "Ide" },
-  { id: "tech", label: "Teknologi" },
-  { id: "questions", label: "Pertanyaan" },
-  { id: "result", label: "Output" },
+const stepItems: Array<{ id: WizardStep }> = [
+  { id: "idea" },
+  { id: "tech" },
+  { id: "questions" },
+  { id: "result" },
 ];
 
 const defaultTech: SelectedTech = {
@@ -55,7 +56,13 @@ type GenerateResponse = {
   error?: string;
 };
 
-export default function PRDWizard() {
+type PRDWizardProps = {
+  language: AppLanguage;
+  setLanguage: (language: AppLanguage) => void;
+  t: I18nText;
+};
+
+export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) {
   const [step, setStep] = useState<WizardStep>("idea");
   const [idea, setIdea] = useState("");
   const [ideaError, setIdeaError] = useState("");
@@ -68,16 +75,26 @@ export default function PRDWizard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const [aiQuestions, setAiQuestions] = useState<AnalyzeQuestion[] | null>(null);
+  const stepLabels: Record<WizardStep, string> = {
+    idea: t.ideaTitle,
+    tech: t.techTitle,
+    questions: t.questionsTitle,
+    result: t.outputTitle,
+  };
 
   const domain = useMemo(() => detectProjectDomain(idea), [idea]);
   const questions = useMemo(
-    () => aiQuestions?.map((item) => item.question) || getDynamicQuestions(domain),
-    [aiQuestions, domain],
+    () => aiQuestions?.map((item) => item.question) || getDynamicQuestions(domain, language),
+    [aiQuestions, domain, language],
   );
   const questionChips = useMemo(
-    () => aiQuestions?.map((item) => item.chips) || getDynamicQuestionChips(domain),
-    [aiQuestions, domain],
+    () => aiQuestions?.map((item) => item.chips) || getDynamicQuestionChips(domain, language),
+    [aiQuestions, domain, language],
   );
+  const allQuestionsAnswered = questions.every((question) => {
+    const answer = answers.find((item) => item.question === question)?.answer || "";
+    return answer.trim().length > 0;
+  });
 
   const activeStepIndex = useMemo(
     () => stepItems.findIndex((item) => item.id === step),
@@ -98,12 +115,12 @@ export default function PRDWizard() {
     const cleanIdea = idea.trim();
 
     if (!cleanIdea) {
-      setIdeaError("Tulis dulu ide aplikasi kamu sebelum lanjut.");
+      setIdeaError(t.ideaRequired);
       return;
     }
 
     if (cleanIdea.length < 24) {
-      setIdeaError("Ide masih terlalu pendek. Tambahkan target user, fitur utama, atau masalah yang ingin diselesaikan.");
+      setIdeaError(t.ideaTooShort);
       return;
     }
 
@@ -123,12 +140,12 @@ export default function PRDWizard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idea }),
+        body: JSON.stringify({ idea, language }),
       });
       const data = (await response.json()) as AnalyzeResponse;
 
       if (!response.ok || data.error) {
-        throw new Error(data.error || "Gagal menganalisis ide.");
+        throw new Error(data.error || t.analyzeFailed);
       }
 
       if (data.questions?.length) {
@@ -136,16 +153,16 @@ export default function PRDWizard() {
       }
 
       if (data.fallback && data.reason) {
-        setApiMessage(`Fallback OpenRouter: ${data.reason}`);
+        setApiMessage(`${t.openRouterFallbackPrefix}: ${data.reason}`);
       } else {
-        setApiMessage(data.source === "openrouter" ? "Analisis ide dibuat dengan OpenRouter." : "");
+        setApiMessage(data.source === "openrouter" ? t.analyzeSuccess : "");
       }
 
       setStep("questions");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Gagal menganalisis ide.";
+      const message = error instanceof Error ? error.message : t.analyzeFailed;
       setAiQuestions(null);
-      setApiMessage(`${message} Menggunakan pertanyaan lokal.`);
+      setApiMessage(`${message} ${t.analyzeLocalQuestions}`);
       setStep("questions");
     } finally {
       setIsAnalyzing(false);
@@ -185,6 +202,13 @@ export default function PRDWizard() {
   }
 
   function goToNextQuestion() {
+    const currentAnswer = answers[activeQuestion]?.answer || "";
+    if (!currentAnswer.trim()) {
+      setApiMessage(t.requiredAnswer);
+      return;
+    }
+    setApiMessage("");
+
     if (activeQuestion < questions.length - 1) {
       setActiveQuestion((current) => current + 1);
       return;
@@ -198,11 +222,18 @@ export default function PRDWizard() {
   }
 
   function handleGenerate() {
+    if (!allQuestionsAnswered) {
+      setApiMessage(t.requiredAllAnswers);
+      return;
+    }
+
     setIsGenerating(true);
 
     async function run() {
       const payload = {
         idea,
+        language,
+        domain,
         techMode,
         selectedTech,
         answers,
@@ -219,11 +250,11 @@ export default function PRDWizard() {
         const data = (await response.json()) as GenerateResponse;
 
         if (!response.ok || data.error || !data.prd) {
-          throw new Error(data.error || "Gagal generate PRD.");
+          throw new Error(data.error || t.generateFailed);
         }
 
         setGeneratedPrd(data.prd);
-        setApiMessage(data.fallback && data.reason ? `Fallback OpenRouter: ${data.reason}` : "");
+        setApiMessage(data.fallback && data.reason ? `${t.openRouterFallbackPrefix}: ${data.reason}` : "");
         savePrdMemory({
           idea,
           answers,
@@ -233,7 +264,7 @@ export default function PRDWizard() {
         });
         setStep("result");
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Gagal generate PRD.";
+        const message = error instanceof Error ? error.message : t.generateFailed;
         setApiMessage(message);
       } finally {
         setIsGenerating(false);
@@ -266,7 +297,7 @@ export default function PRDWizard() {
             >
               <div className="flex items-center gap-2 text-xs font-bold">
                 {isDone ? <CheckCircle2 size={15} /> : <Circle size={15} />}
-                <span className="hidden sm:inline">{item.label}</span>
+                <span className="hidden sm:inline">{stepLabels[item.id]}</span>
                 <span className="sm:hidden">{index + 1}</span>
               </div>
             </div>
@@ -274,8 +305,32 @@ export default function PRDWizard() {
         })}
       </div>
 
+      <div className="mb-4 flex items-center justify-between rounded-lg border border-white/10 bg-slate-950/45 p-3">
+        <span className="text-sm font-bold text-slate-300">{t.languageLabel}</span>
+        <div className="flex gap-2">
+          {(["id", "en"] as AppLanguage[]).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => {
+                setLanguage(item);
+                setAiQuestions(null);
+                setApiMessage("");
+              }}
+              className={`rounded-md px-3 py-2 text-sm font-bold transition ${
+                language === item
+                  ? "bg-cyan-300 text-slate-950"
+                  : "border border-white/10 text-slate-300 hover:bg-white/[0.06]"
+              }`}
+            >
+              {item === "id" ? t.indonesia : t.english}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {step === "idea" ? (
-        <IdeaStep idea={idea} error={ideaError} onIdeaChange={setIdea} onNext={goToTech} />
+        <IdeaStep idea={idea} error={ideaError} onIdeaChange={setIdea} onNext={goToTech} t={t} />
       ) : null}
 
       {step === "tech" ? (
@@ -287,6 +342,7 @@ export default function PRDWizard() {
           onBack={() => setStep("idea")}
           onNext={analyzeIdeaAndGoToQuestions}
           isAnalyzing={isAnalyzing}
+          t={t}
         />
       ) : null}
 
@@ -298,9 +354,11 @@ export default function PRDWizard() {
           activeQuestion={activeQuestion}
           isGenerating={isGenerating}
           message={apiMessage}
+          allQuestionsAnswered={allQuestionsAnswered}
+          t={t}
           onAnswerChange={handleAnswerChange}
           onChipSelect={handleChipSelect}
-          onSkip={goToNextQuestion}
+          onNextQuestion={goToNextQuestion}
           onBackQuestion={goToPreviousQuestion}
           onBackToTech={() => setStep("tech")}
           onGenerate={handleGenerate}
@@ -312,6 +370,7 @@ export default function PRDWizard() {
           content={generatedPrd}
           isGenerating={isGenerating}
           message={apiMessage}
+          t={t}
           onBackToEdit={() => setStep("idea")}
           onRegenerate={handleRegenerate}
         />

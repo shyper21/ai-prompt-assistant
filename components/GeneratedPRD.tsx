@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { ArrowLeft, Check, Copy, FileDown, RotateCcw, TerminalSquare } from "lucide-react";
+import type { I18nText } from "@/lib/i18n";
 
 type GeneratedPRDProps = {
   content: string;
   isGenerating?: boolean;
   message?: string;
+  t: I18nText;
   onBackToEdit?: () => void;
   onRegenerate?: () => void;
 };
@@ -15,6 +17,7 @@ export default function GeneratedPRD({
   content,
   isGenerating = false,
   message,
+  t,
   onBackToEdit,
   onRegenerate,
 }: GeneratedPRDProps) {
@@ -42,11 +45,11 @@ export default function GeneratedPRD({
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase text-cyan-300">
             <TerminalSquare size={15} />
-            Output agent
+            {t.outputLabel}
           </div>
-          <h2 className="mt-2 text-xl font-black text-white">PRD Markdown Lengkap</h2>
+          <h2 className="mt-2 text-xl font-black text-white">{t.outputTitle}</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Copy-paste hasil ini ke ChatGPT, Claude, Gemini, Codex, Claude Code, atau developer.
+            {t.outputDescription}
           </p>
         </div>
 
@@ -58,7 +61,7 @@ export default function GeneratedPRD({
               className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
             >
               <ArrowLeft size={17} />
-              Edit masukan
+              {t.editInput}
             </button>
           ) : null}
 
@@ -70,7 +73,7 @@ export default function GeneratedPRD({
               className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-300/25 bg-violet-300/10 px-4 py-2 text-sm font-bold text-violet-100 transition hover:bg-violet-300/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCcw size={17} />
-              {isGenerating ? "Membuat ulang..." : "Generate ulang"}
+              {isGenerating ? t.regenerating : t.regenerate}
             </button>
           ) : null}
 
@@ -80,7 +83,7 @@ export default function GeneratedPRD({
             className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
           >
             <FileDown size={17} />
-            Download .md
+            {t.download}
           </button>
 
           <button
@@ -89,7 +92,7 @@ export default function GeneratedPRD({
             className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-100"
           >
             {copied ? <Check size={17} /> : <Copy size={17} />}
-            {copied ? "Tersalin" : "Copy"}
+            {copied ? t.copied : t.copy}
           </button>
         </div>
       </div>
