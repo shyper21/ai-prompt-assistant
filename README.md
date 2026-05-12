@@ -75,7 +75,7 @@ Buatkan website financial tracker harian untuk mencatat pemasukan dan pengeluara
 5. Jawab atau lewati 5 pertanyaan tambahan.
 6. Klik "Generate PRD" untuk memanggil `/api/generate-prd`.
 7. Pastikan output berisi dokumen panjang mulai dari `# PRD - Project Requirements Document`.
-8. Coba tombol Copy, Download `.md`, Edit input, dan Generate ulang.
+8. Coba tombol Copy, Download `.md`, Edit masukan, dan Generate ulang.
 
 ## Build Production
 

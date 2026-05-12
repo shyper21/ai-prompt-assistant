@@ -67,7 +67,7 @@ export default function IdeaStep({ idea, error, onIdeaChange, onNext }: IdeaStep
             onClick={onNext}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-cyan-300 via-lime-200 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-neon transition hover:scale-[1.01]"
           >
-            Next
+            Lanjut
             <ArrowRight size={18} />
           </button>
         </div>

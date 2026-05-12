@@ -96,6 +96,95 @@ function cleanText(text: string) {
   return text.replace(/[\n\r]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function normalizeUserFacingText(text: string) {
+  return text
+    .replace(/\bUser\b/g, "Pengguna")
+    .replace(/\buser\b/g, "pengguna")
+    .replace(/\bUsers\b/g, "Pengguna")
+    .replace(/\bCustomer\b/g, "Pelanggan")
+    .replace(/\bcustomer\b/g, "pelanggan")
+    .replace(/\bCustomers\b/g, "Pelanggan")
+    .replace(/\bStaff\b/g, "Staf")
+    .replace(/\bstaff\b/g, "staf")
+    .replace(/\bOwner\b/g, "Pemilik")
+    .replace(/\bowner\b/g, "pemilik")
+    .replace(/\bManager\b/g, "Manajer")
+    .replace(/\bWriter\b/g, "Penulis")
+    .replace(/\bTeacher\b/g, "Guru")
+    .replace(/\bStudent\b/g, "Siswa")
+    .replace(/\bLearner\b/g, "Peserta belajar")
+    .replace(/\bMember\b/g, "Anggota")
+    .replace(/\bStock\b/g, "Stok")
+    .replace(/\bstock\b/g, "stok")
+    .replace(/\bExport\b/g, "Ekspor")
+    .replace(/\bexport\b/g, "ekspor")
+    .replace(/\bAlert\b/g, "Peringatan")
+    .replace(/\bAlerts\b/g, "Peringatan")
+    .replace(/\balert\b/g, "peringatan")
+    .replace(/\bReminder\b/g, "Pengingat")
+    .replace(/\bReminders\b/g, "Pengingat")
+    .replace(/\bReports\b/g, "Laporan")
+    .replace(/\bReport\b/g, "Laporan")
+    .replace(/\breport\b/g, "laporan")
+    .replace(/\bSettings\b/g, "Pengaturan")
+    .replace(/\bSetting\b/g, "Pengaturan")
+    .replace(/\bProducts\b/g, "Produk")
+    .replace(/\bProduct\b/g, "Produk")
+    .replace(/\bOrders\b/g, "Pesanan")
+    .replace(/\bOrder\b/g, "Pesanan")
+    .replace(/\bLeads\b/g, "Lead")
+    .replace(/\bTasks\b/g, "Tugas")
+    .replace(/\bTask\b/g, "Tugas")
+    .replace(/\bPosts\b/g, "Konten")
+    .replace(/\bPost\b/g, "Konten")
+    .replace(/\bDashboard Inventory\b/g, "Dashboard Inventori")
+    .replace(/\bBooking Form\b/g, "Form Booking")
+    .replace(/\bSchedule Calendar\b/g, "Kalender Jadwal")
+    .replace(/\bLearning Dashboard\b/g, "Dashboard Belajar")
+    .replace(/\bSales Dashboard\b/g, "Dashboard Penjualan")
+    .replace(/\bTask Dashboard\b/g, "Dashboard Tugas")
+    .replace(/\bContent Dashboard\b/g, "Dashboard Konten")
+    .replace(/\bProduct Catalog\b/g, "Katalog Produk")
+    .replace(/\bStorefront\b/g, "Etalase Toko")
+    .replace(/\bOverview Dashboard\b/g, "Dashboard Ringkasan")
+    .replace(/\bLow budget alert\b/g, "Peringatan budget rendah")
+    .replace(/\bLow stock alert\b/g, "Peringatan stok rendah")
+    .replace(/\bAuto confirmed\b/g, "Konfirmasi otomatis")
+    .replace(/\bWaitlist\b/g, "Daftar tunggu")
+    .replace(/\bSelf-paced\b/g, "Belajar mandiri")
+    .replace(/\bStreak\b/g, "Rangkaian belajar")
+    .replace(/\bBadge\b/g, "Lencana")
+    .replace(/\bReminder follow-up\b/g, "Pengingat follow-up")
+    .replace(/\bEmail note\b/g, "Catatan email")
+    .replace(/\bPublish langsung\b/g, "Terbitkan langsung")
+    .replace(/\bExport content\b/g, "Ekspor konten")
+    .replace(/\bRevenue\b/g, "Pendapatan")
+    .replace(/\bOperations\b/g, "Operasional")
+    .replace(/\bSupport\b/g, "Dukungan")
+    .replace(/\bRegistered pengguna\b/g, "Pengguna terdaftar")
+    .replace(/\bHousehold admin\b/g, "Admin keluarga")
+    .replace(/\bBusiness pemilik\b/g, "Pemilik bisnis")
+    .replace(/\bWarehouse staf\b/g, "Staf gudang")
+    .replace(/\bStore admin\b/g, "Admin toko")
+    .replace(/\bFulfillment staf\b/g, "Staf fulfillment")
+    .replace(/\bProject manajer\b/g, "Manajer proyek")
+    .replace(/\bSales manajer\b/g, "Manajer sales")
+    .replace("## 4. Pengguna Flow", "## 4. User Flow");
+}
+
+function normalizePrdExceptFinalPrompt(markdown: string) {
+  const marker = "## 10. Prompt untuk AI Coding Agent";
+  const index = markdown.indexOf(marker);
+
+  if (index === -1) {
+    return normalizeUserFacingText(markdown);
+  }
+
+  const beforeFinalPrompt = markdown.slice(0, index);
+  const finalPrompt = markdown.slice(index);
+  return `${normalizeUserFacingText(beforeFinalPrompt)}${finalPrompt}`;
+}
+
 function includesAny(text: string, keywords: string[]) {
   const lower = text.toLowerCase();
   return keywords.some((keyword) => lower.includes(keyword));
@@ -561,11 +650,11 @@ function getDomainProfile(domain: ProjectDomain, idea: string): DomainProfile {
 }
 
 export function getDynamicQuestions(domain: ProjectDomain) {
-  return getDomainProfile(domain, "").questions;
+  return getDomainProfile(domain, "").questions.map(normalizeUserFacingText);
 }
 
 export function getDynamicQuestionChips(domain: ProjectDomain) {
-  return getDomainProfile(domain, "").chips;
+  return getDomainProfile(domain, "").chips.map((group) => group.map(normalizeUserFacingText));
 }
 
 export function inferRecommendedStack(domain: ProjectDomain, idea: string): StackRecommendation {
@@ -828,18 +917,18 @@ function renderArchitecture(profile: DomainProfile) {
 
 \`\`\`mermaid
 sequenceDiagram
-    participant User as User Browser
+    participant Pengguna as Browser Pengguna
     participant UI as Frontend
     participant API as Backend/API
     participant DB as Database
 
-    User->>UI: Fill form or trigger action
-    UI->>API: Submit validated request
-    API->>API: Authorize user and validate domain rules
-    API->>DB: Save ${profile.primaryEntityLabel} and activity log
-    DB-->>API: Return persisted result
-    API-->>UI: Return success or validation error
-    UI-->>User: Update dashboard, list, and alerts
+    Pengguna->>UI: Mengisi form atau menjalankan aksi
+    UI->>API: Mengirim request yang sudah divalidasi
+    API->>API: Mengecek akses pengguna dan aturan domain
+    API->>DB: Menyimpan ${profile.primaryEntityLabel} dan activity log
+    DB-->>API: Mengembalikan data tersimpan
+    API-->>UI: Mengembalikan sukses atau error validasi
+    UI-->>Pengguna: Memperbarui dashboard, list, dan peringatan
 \`\`\``;
 }
 
@@ -853,7 +942,7 @@ function renderApiSpec(profile: DomainProfile, backend: string) {
 ${profile.apiActions.join("\n")}
 \`\`\`
 
-Response pattern:
+Pola response:
 
 \`\`\`ts
 type ActionResponse<T> = {
@@ -1000,7 +1089,7 @@ export function generatePRD(input: GeneratePRDInput) {
   const features = generateCoreFeatures(domain, input.answers);
   const answeredContext = getAnsweredContext(input.answers);
 
-  return `# PRD — Project Requirements Document
+  return normalizePrdExceptFinalPrompt(`# PRD — Project Requirements Document
 
 ## Nama Proyek
 ${profile.projectName}
@@ -1068,7 +1157,7 @@ ${profile.acceptance.map((item) => `- [ ] ${item}`).join("\n")}
 
 ## 10. Prompt untuk AI Coding Agent
 ${renderFinalAgentPrompt(input, domain, profile, tech, tables, features)}
-`;
+`);
 }
 
 export { genericQuestions as defaultQuestions };

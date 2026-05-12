@@ -136,7 +136,7 @@ export default function PRDWizard() {
       }
 
       if (data.fallback && data.reason) {
-        setApiMessage(`OpenRouter fallback: ${data.reason}`);
+        setApiMessage(`Fallback OpenRouter: ${data.reason}`);
       } else {
         setApiMessage(data.source === "openrouter" ? "Analisis ide dibuat dengan OpenRouter." : "");
       }
@@ -223,7 +223,7 @@ export default function PRDWizard() {
         }
 
         setGeneratedPrd(data.prd);
-        setApiMessage(data.fallback && data.reason ? `OpenRouter fallback: ${data.reason}` : "");
+        setApiMessage(data.fallback && data.reason ? `Fallback OpenRouter: ${data.reason}` : "");
         savePrdMemory({
           idea,
           answers,

@@ -12,12 +12,31 @@ function isValidInput(value: Partial<GeneratePRDInput>): value is GeneratePRDInp
   );
 }
 
+const englishBodyPatterns = [
+  /the application should/i,
+  /the user can/i,
+  /users can/i,
+  /this feature/i,
+  /the system will/i,
+  /must be able to/i,
+  /primary users/i,
+  /target users/i,
+  /business goal/i,
+  /key feature/i,
+];
+
+function prdBodyHasEnglishSentences(markdown: string) {
+  const marker = "## 10. Prompt untuk AI Coding Agent";
+  const body = markdown.slice(0, markdown.indexOf(marker) === -1 ? markdown.length : markdown.indexOf(marker));
+  return englishBodyPatterns.some((pattern) => pattern.test(body));
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<GeneratePRDInput>;
 
     if (!isValidInput(body) || !body.idea.trim()) {
-      return NextResponse.json({ error: "Invalid PRD generation input." }, { status: 400 });
+      return NextResponse.json({ error: "Input generate PRD tidak valid." }, { status: 400 });
     }
 
     const localPrd = generatePRD(body);
@@ -26,7 +45,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         source: "local",
         fallback: true,
-        reason: "OPENROUTER_API_KEY is not configured. Local generator was used.",
+        reason: "OPENROUTER_API_KEY belum dikonfigurasi. Generator lokal digunakan.",
         prd: localPrd,
       });
     }
@@ -39,7 +58,7 @@ export async function POST(request: Request) {
           {
             role: "system",
             content:
-              "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only.",
+              "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. Write all PRD content in Bahasa Indonesia, except the final AI Coding Agent prompt, which may be in English.",
           },
           {
             role: "user",
@@ -48,21 +67,29 @@ export async function POST(request: Request) {
         ],
       });
 
+      if (prdBodyHasEnglishSentences(prd)) {
+        return NextResponse.json({
+          source: "local",
+          fallback: true,
+          reason: "Output OpenRouter terdeteksi mencampur kalimat Bahasa Inggris di luar prompt akhir. Generator lokal digunakan.",
+          prd: localPrd,
+        });
+      }
+
       return NextResponse.json({
         source: "openrouter",
         fallback: false,
         prd,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "OpenRouter PRD generation failed.";
       return NextResponse.json({
         source: "local",
         fallback: true,
-        reason: message,
+        reason: "Request OpenRouter gagal. Generator lokal digunakan.",
         prd: localPrd,
       });
     }
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON request." }, { status: 400 });
+    } catch {
+    return NextResponse.json({ error: "Request JSON tidak valid." }, { status: 400 });
   }
 }

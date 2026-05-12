@@ -42,7 +42,7 @@ export default function GeneratedPRD({
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase text-cyan-300">
             <TerminalSquare size={15} />
-            Agent output
+            Output agent
           </div>
           <h2 className="mt-2 text-xl font-black text-white">PRD Markdown Lengkap</h2>
           <p className="mt-1 text-sm text-slate-400">
@@ -58,7 +58,7 @@ export default function GeneratedPRD({
               className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
             >
               <ArrowLeft size={17} />
-              Edit input
+              Edit masukan
             </button>
           ) : null}
 
@@ -70,7 +70,7 @@ export default function GeneratedPRD({
               className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-300/25 bg-violet-300/10 px-4 py-2 text-sm font-bold text-violet-100 transition hover:bg-violet-300/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCcw size={17} />
-              {isGenerating ? "Generating..." : "Generate ulang"}
+              {isGenerating ? "Membuat ulang..." : "Generate ulang"}
             </button>
           ) : null}
 

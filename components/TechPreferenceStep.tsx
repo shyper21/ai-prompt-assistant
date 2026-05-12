@@ -137,7 +137,7 @@ export default function TechPreferenceStep({
             disabled={isAnalyzing}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-cyan-300 via-lime-200 to-violet-300 px-5 py-3 text-sm font-black text-slate-950 shadow-neon transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isAnalyzing ? "Menganalisis ide..." : "Next"}
+            {isAnalyzing ? "Menganalisis ide..." : "Lanjut"}
             <ArrowRight size={18} />
           </button>
         </div>

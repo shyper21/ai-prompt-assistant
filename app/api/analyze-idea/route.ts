@@ -14,7 +14,8 @@ type AnalyzeRequest = {
 
 type AiQuestion = {
   question: string;
-  chips: string[];
+  chips?: string[];
+  options?: string[];
 };
 
 type AiAnalyzeResponse = {
@@ -46,20 +47,65 @@ function safeParseJson(text: string): AiAnalyzeResponse {
   return JSON.parse(cleaned) as AiAnalyzeResponse;
 }
 
+const englishQuestionPatterns = [
+  /who are/i,
+  /what are/i,
+  /how do/i,
+  /which features/i,
+  /primary users/i,
+  /target users/i,
+  /what is/i,
+  /which/i,
+  /how should/i,
+  /do you need/i,
+  /\bpersonal\b/i,
+  /\bbusiness\b/i,
+  /\bfamily\b/i,
+  /\bincome\b/i,
+  /\bexpense\b/i,
+  /\bmonthly chart\b/i,
+  /\bexport report\b/i,
+  /\bsingle admin\b/i,
+  /\bmultiple admin/i,
+  /\bsmall store\b/i,
+  /\bwarehouse\b/i,
+];
+
+function hasEnglishUserFacingText(value: string) {
+  return englishQuestionPatterns.some((pattern) => pattern.test(value));
+}
+
+function normalizeQuestions(questions: AiQuestion[]) {
+  return questions.map((item) => ({
+    question: item.question,
+    chips: item.chips || item.options || [],
+  }));
+}
+
+function shouldUseQuestionFallback(questions: AiQuestion[] | undefined) {
+  if (!questions || questions.length !== 5) return true;
+
+  const normalized = normalizeQuestions(questions);
+  return normalized.some((item) => {
+    const chipText = item.chips.join(" ");
+    return hasEnglishUserFacingText(item.question) || hasEnglishUserFacingText(chipText);
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as AnalyzeRequest;
     const idea = body.idea?.trim();
 
     if (!idea) {
-      return NextResponse.json({ error: "Idea is required." }, { status: 400 });
+      return NextResponse.json({ error: "Ide aplikasi wajib diisi." }, { status: 400 });
     }
 
     const localDomain = detectProjectDomain(idea);
     const fallbackQuestions = getDynamicQuestions(localDomain);
 
     if (!hasOpenRouterConfig()) {
-      return NextResponse.json(fallbackAnalyze(idea, "OPENROUTER_API_KEY is not configured."));
+      return NextResponse.json(fallbackAnalyze(idea, "OPENROUTER_API_KEY belum dikonfigurasi."));
     }
 
     try {
@@ -69,7 +115,8 @@ export async function POST(request: Request) {
         messages: [
           {
             role: "system",
-            content: "You return strict JSON for product discovery. No markdown.",
+            content:
+              "Return strict JSON for product discovery. No markdown. All user-facing text must be in Bahasa Indonesia.",
           },
           {
             role: "user",
@@ -81,21 +128,24 @@ export async function POST(request: Request) {
       const parsed = safeParseJson(content);
       const domain = parsed.domain || localDomain;
       const fallback = fallbackAnalyze(idea);
-      const questions = parsed.questions?.length === 5 ? parsed.questions : fallback.questions;
+      const questions = shouldUseQuestionFallback(parsed.questions)
+        ? fallback.questions
+        : normalizeQuestions(parsed.questions || []);
 
       return NextResponse.json({
         source: "openrouter",
-        fallback: false,
+        fallback: questions === fallback.questions,
+        reason: questions === fallback.questions ? "Pertanyaan OpenRouter terdeteksi tidak sepenuhnya berbahasa Indonesia." : undefined,
         domain,
         confidence: parsed.confidence ?? 0.85,
         summary: parsed.summary || fallback.summary,
         questions,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "OpenRouter analyze request failed.";
+      const message = error instanceof Error && error.message ? "Request OpenRouter gagal. Pertanyaan lokal digunakan." : "Analisis OpenRouter gagal. Pertanyaan lokal digunakan.";
       return NextResponse.json(fallbackAnalyze(idea, message));
     }
   } catch {
-    return NextResponse.json({ error: "Invalid JSON request." }, { status: 400 });
+    return NextResponse.json({ error: "Request JSON tidak valid." }, { status: 400 });
   }
 }

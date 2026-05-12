@@ -119,7 +119,7 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between rounded-lg border border-white/10 bg-slate-950/45 px-4 py-3 backdrop-blur">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
                 <Radar size={16} className="text-lime-300" />
-                AI route + local fallback
+                API AI + fallback lokal
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <Braces size={14} className="text-violet-300" />
@@ -134,7 +134,7 @@ export default function Home() {
         <footer className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-center gap-3 px-5 pb-8 text-sm text-slate-500">
           <span className="inline-flex items-center gap-2">
             <FileText size={16} className="text-cyan-300" />
-            Product brief, bukan PRD pendek
+            Brief produk, bukan PRD pendek
           </span>
           <span className="hidden text-slate-700 sm:inline">/</span>
           <span className="inline-flex items-center gap-2">
