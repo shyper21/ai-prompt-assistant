@@ -131,7 +131,7 @@ export default function HeroInput() {
         </div>
       ) : null}
 
-      {result ? <GeneratedPRD content={result} t={t} /> : null}
+      {result ? <GeneratedPRD content={result} t={dict} /> : null}
     </div>
   );
 }
