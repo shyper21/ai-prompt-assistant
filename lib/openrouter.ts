@@ -20,15 +20,16 @@ export type OpenRouterRequest = {
   messages: OpenRouterMessage[];
   temperature?: number;
   maxTokens?: number;
+  model?: string;
 };
 
 export function hasOpenRouterConfig() {
   return Boolean(process.env.OPENROUTER_API_KEY);
 }
 
-export async function callOpenRouter({ messages, temperature = 0.3, maxTokens = 6000 }: OpenRouterRequest) {
+export async function callOpenRouter({ messages, temperature = 0.3, maxTokens = 6000, model }: OpenRouterRequest) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || "openai/gpt-5.2";
+  const selectedModel = model || "google/gemini-2.0-flash-lite-001";
 
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is not configured.");
@@ -43,7 +44,7 @@ export async function callOpenRouter({ messages, temperature = 0.3, maxTokens = 
       "X-Title": "PromptForge AI PRD Generator",
     },
     body: JSON.stringify({
-      model,
+      model: selectedModel,
       messages,
       temperature,
       max_tokens: maxTokens,

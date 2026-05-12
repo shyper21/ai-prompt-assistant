@@ -10,7 +10,9 @@ import {
   detectProjectDomain,
   getDynamicQuestionChips,
   getDynamicQuestions,
+  type ApiMode,
   type PrdAnswer,
+  type ProjectDomain,
   type SelectedTech,
   type TechMode,
 } from "@/lib/generate-prd";
@@ -33,23 +35,55 @@ const defaultTech: SelectedTech = {
   deployment: "Vercel",
 };
 
+const apiModeOptions: ApiMode[] = ["local", "economy", "full"];
+
+function isApiMode(value: string | null): value is ApiMode {
+  return value === "local" || value === "economy" || value === "full";
+}
+
+function makeCacheKey(scope: "analyze" | "generate", payload: unknown) {
+  return `promptforge.${scope}.${JSON.stringify(payload)}`;
+}
+
+function readCache<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache<T>(key: string, value: T) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Cache is an optimization only. The wizard should keep working if storage is full.
+  }
+}
+
 type AnalyzeQuestion = {
   question: string;
   chips: string[];
 };
 
 type AnalyzeResponse = {
-  source?: "openrouter" | "local";
+  source?: "openrouter" | "local" | "local-fallback";
   fallback?: boolean;
   reason?: string;
-  domain?: string;
+  domain?: ProjectDomain;
   summary?: string;
   questions?: AnalyzeQuestion[];
   error?: string;
 };
 
 type GenerateResponse = {
-  source?: "openrouter" | "local";
+  source?: "openrouter" | "local" | "local-fallback";
   fallback?: boolean;
   reason?: string;
   prd?: string;
@@ -66,6 +100,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
   const [step, setStep] = useState<WizardStep>("idea");
   const [idea, setIdea] = useState("");
   const [ideaError, setIdeaError] = useState("");
+  const [apiMode, setApiMode] = useState<ApiMode>("economy");
   const [techMode, setTechMode] = useState<TechMode>("ai");
   const [selectedTech, setSelectedTech] = useState<SelectedTech>(defaultTech);
   const [answers, setAnswers] = useState<PrdAnswer[]>([]);
@@ -75,6 +110,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const [aiQuestions, setAiQuestions] = useState<AnalyzeQuestion[] | null>(null);
+  const [analyzedDomain, setAnalyzedDomain] = useState<ProjectDomain | null>(null);
   const stepLabels: Record<WizardStep, string> = {
     idea: t.ideaTitle,
     tech: t.techTitle,
@@ -82,7 +118,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
     result: t.outputTitle,
   };
 
-  const domain = useMemo(() => detectProjectDomain(idea), [idea]);
+  const domain = useMemo(() => analyzedDomain || detectProjectDomain(idea), [analyzedDomain, idea]);
   const questions = useMemo(
     () => aiQuestions?.map((item) => item.question) || getDynamicQuestions(domain, language),
     [aiQuestions, domain, language],
@@ -111,6 +147,17 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
     setActiveQuestion(0);
   }, [questions]);
 
+  useEffect(() => {
+    const storedApiMode = window.localStorage.getItem("promptforge.apiMode");
+    if (isApiMode(storedApiMode)) {
+      setApiMode(storedApiMode);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("promptforge.apiMode", apiMode);
+  }, [apiMode]);
+
   function goToTech() {
     const cleanIdea = idea.trim();
 
@@ -126,6 +173,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
 
     setIdeaError("");
     setAiQuestions(null);
+    setAnalyzedDomain(null);
     setApiMessage("");
     setStep("tech");
   }
@@ -135,12 +183,24 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
     setApiMessage("");
 
     try {
+      const cleanIdea = idea.trim();
+      const cacheKey = makeCacheKey("analyze", { idea: cleanIdea, language, apiMode });
+      const cached = readCache<AnalyzeResponse>(cacheKey);
+
+      if (cached?.questions?.length) {
+        setAiQuestions(cached.questions);
+        setAnalyzedDomain(cached.domain || null);
+        setApiMessage(t.cachedResult);
+        setStep("questions");
+        return;
+      }
+
       const response = await fetch("/api/analyze-idea", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idea, language }),
+        body: JSON.stringify({ idea: cleanIdea, language, apiMode }),
       });
       const data = (await response.json()) as AnalyzeResponse;
 
@@ -152,10 +212,15 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
         setAiQuestions(data.questions);
       }
 
-      if (data.fallback && data.reason) {
-        setApiMessage(`${t.openRouterFallbackPrefix}: ${data.reason}`);
+      setAnalyzedDomain(data.domain || null);
+      writeCache(cacheKey, data);
+
+      if (data.source === "openrouter" && !data.fallback) {
+        setApiMessage(t.analyzeSuccess);
+      } else if (data.reason) {
+        setApiMessage(`${t.generatedWithLocal} ${data.reason}`);
       } else {
-        setApiMessage(data.source === "openrouter" ? t.analyzeSuccess : "");
+        setApiMessage(data.source === "local-fallback" ? t.generatedWithLocal : "");
       }
 
       setStep("questions");
@@ -221,7 +286,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
     setActiveQuestion((current) => Math.max(0, current - 1));
   }
 
-  function handleGenerate() {
+  function handleGenerate(forceRefresh = false) {
     if (!allQuestionsAnswered) {
       setApiMessage(t.requiredAllAnswers);
       return;
@@ -230,16 +295,44 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
     setIsGenerating(true);
 
     async function run() {
+      const cleanIdea = idea.trim();
       const payload = {
-        idea,
+        idea: cleanIdea,
         language,
+        apiMode,
         domain,
         techMode,
         selectedTech,
         answers,
       };
+      const cacheKey = makeCacheKey("generate", {
+        idea: cleanIdea,
+        language,
+        apiMode,
+        domain,
+        techMode,
+        selectedTech,
+        answers,
+      });
 
       try {
+        if (!forceRefresh) {
+          const cached = readCache<GenerateResponse>(cacheKey);
+          if (cached?.prd) {
+            setGeneratedPrd(cached.prd);
+            setApiMessage(t.cachedResult);
+            savePrdMemory({
+              idea: cleanIdea,
+              answers,
+              generatedPrd: cached.prd,
+              createdAt: new Date().toISOString(),
+              userFeedback: "",
+            });
+            setStep("result");
+            return;
+          }
+        }
+
         const response = await fetch("/api/generate-prd", {
           method: "POST",
           headers: {
@@ -254,9 +347,16 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
         }
 
         setGeneratedPrd(data.prd);
-        setApiMessage(data.fallback && data.reason ? `${t.openRouterFallbackPrefix}: ${data.reason}` : "");
+        writeCache(cacheKey, data);
+        if (data.source === "openrouter" && !data.fallback) {
+          setApiMessage(t.generatedWithOpenRouter);
+        } else if (data.reason) {
+          setApiMessage(`${t.generatedWithLocal} ${data.reason}`);
+        } else {
+          setApiMessage(data.source === "local-fallback" ? t.generatedWithLocal : "");
+        }
         savePrdMemory({
-          idea,
+          idea: cleanIdea,
           answers,
           generatedPrd: data.prd,
           createdAt: new Date().toISOString(),
@@ -275,7 +375,11 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
   }
 
   function handleRegenerate() {
-    handleGenerate();
+    if (apiMode !== "local" && !window.confirm(t.quotaWarning)) {
+      return;
+    }
+
+    handleGenerate(true);
   }
 
   return (
@@ -315,6 +419,7 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
               onClick={() => {
                 setLanguage(item);
                 setAiQuestions(null);
+                setAnalyzedDomain(null);
                 setApiMessage("");
               }}
               className={`rounded-md px-3 py-2 text-sm font-bold transition ${
@@ -326,6 +431,33 @@ export default function PRDWizard({ language, setLanguage, t }: PRDWizardProps) 
               {item === "id" ? t.indonesia : t.english}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="mb-4 flex flex-col gap-3 rounded-lg border border-white/10 bg-slate-950/45 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm font-bold text-slate-300">{t.apiModeLabel}</span>
+        <div className="grid grid-cols-3 gap-2">
+          {apiModeOptions.map((item) => {
+            const label =
+              item === "local" ? t.localMode : item === "economy" ? t.economyMode : t.fullMode;
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setApiMode(item);
+                  setApiMessage("");
+                }}
+                className={`rounded-md px-3 py-2 text-sm font-bold transition ${
+                  apiMode === item
+                    ? "bg-fuchsia-300 text-slate-950"
+                    : "border border-white/10 text-slate-300 hover:bg-white/[0.06]"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

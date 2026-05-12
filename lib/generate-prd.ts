@@ -1,6 +1,7 @@
 import type { AppLanguage } from "@/lib/i18n";
 
 export type TechMode = "ai" | "manual";
+export type ApiMode = "local" | "economy" | "full";
 
 export type SelectedTech = {
   frontend?: string;
@@ -18,6 +19,7 @@ export type GeneratePRDInput = {
   idea: string;
   language?: AppLanguage;
   domain?: ProjectDomain;
+  apiMode?: ApiMode;
   techMode: TechMode;
   selectedTech: SelectedTech;
   answers: PrdAnswer[];
@@ -35,6 +37,24 @@ export type ProjectDomain =
   | "saas-dashboard"
   | "ai-agent"
   | "generic-web-app";
+
+const projectDomains: ProjectDomain[] = [
+  "finance-tracker",
+  "inventory",
+  "booking-system",
+  "learning-app",
+  "crm-sales",
+  "task-management",
+  "content-management",
+  "e-commerce",
+  "saas-dashboard",
+  "ai-agent",
+  "generic-web-app",
+];
+
+export function isProjectDomain(value: unknown): value is ProjectDomain {
+  return typeof value === "string" && projectDomains.includes(value as ProjectDomain);
+}
 
 type CoreFeature = {
   name: string;

@@ -4,14 +4,18 @@ import {
   detectProjectDomain,
   getDynamicQuestionChips,
   getDynamicQuestions,
+  isProjectDomain,
   type ProjectDomain,
 } from "@/lib/generate-prd";
 import type { AppLanguage } from "@/lib/i18n";
 import { callOpenRouter, hasOpenRouterConfig } from "@/lib/openrouter";
 
+type ApiMode = "local" | "economy" | "full";
+
 type AnalyzeRequest = {
   idea?: string;
   language?: AppLanguage;
+  apiMode?: ApiMode;
 };
 
 type AiQuestion = {
@@ -31,7 +35,7 @@ function fallbackAnalyze(idea: string, language: AppLanguage, reason?: string) {
   const domain = detectProjectDomain(idea);
 
   return {
-    source: "local",
+    source: "local-fallback",
     fallback: Boolean(reason),
     reason,
     domain,
@@ -120,6 +124,10 @@ export async function POST(request: Request) {
     const body = (await request.json()) as AnalyzeRequest;
     const idea = body.idea?.trim();
     const language: AppLanguage = body.language === "en" ? "en" : "id";
+    const apiMode: ApiMode =
+      body.apiMode === "local" || body.apiMode === "full" || body.apiMode === "economy"
+        ? body.apiMode
+        : "economy";
 
     if (!idea) {
       return NextResponse.json(
@@ -131,20 +139,30 @@ export async function POST(request: Request) {
     const localDomain = detectProjectDomain(idea);
     const fallbackQuestions = getDynamicQuestions(localDomain, language);
 
-    if (!hasOpenRouterConfig()) {
+    if (apiMode === "local" || !hasOpenRouterConfig()) {
       return NextResponse.json(
-        fallbackAnalyze(
-          idea,
-          language,
-          language === "id" ? "OPENROUTER_API_KEY belum dikonfigurasi." : "OPENROUTER_API_KEY is not configured.",
-        ),
+        {
+          ...fallbackAnalyze(
+            idea,
+            language,
+            apiMode === "local"
+              ? language === "id"
+                ? "Mode lokal aktif. OpenRouter tidak dipanggil."
+                : "Local mode is active. OpenRouter was not called."
+              : language === "id"
+                ? "OPENROUTER_API_KEY belum dikonfigurasi."
+                : "OPENROUTER_API_KEY is not configured.",
+          ),
+          source: "local-fallback",
+        },
       );
     }
 
     try {
       const content = await callOpenRouter({
         temperature: 0.2,
-        maxTokens: 1200,
+        maxTokens: apiMode === "full" ? 900 : 700,
+        model: process.env.OPENROUTER_ANALYZE_MODEL || "google/gemini-2.0-flash-lite-001",
         messages: [
           {
             role: "system",
@@ -161,14 +179,14 @@ export async function POST(request: Request) {
       });
 
       const parsed = safeParseJson(content);
-      const domain = parsed.domain || localDomain;
+      const domain = isProjectDomain(parsed.domain) ? parsed.domain : localDomain;
       const fallback = fallbackAnalyze(idea, language);
       const questions = shouldUseQuestionFallback(parsed.questions, language)
         ? fallback.questions
         : normalizeQuestions(parsed.questions || []);
 
       return NextResponse.json({
-        source: "openrouter",
+        source: questions === fallback.questions ? "local-fallback" : "openrouter",
         fallback: questions === fallback.questions,
         reason:
           questions === fallback.questions
@@ -186,7 +204,7 @@ export async function POST(request: Request) {
         language === "id"
           ? "Request OpenRouter gagal. Pertanyaan lokal digunakan."
           : "OpenRouter request failed. Local questions were used.";
-      return NextResponse.json(fallbackAnalyze(idea, language, message));
+      return NextResponse.json({ ...fallbackAnalyze(idea, language, message), source: "local-fallback" });
     }
   } catch {
     return NextResponse.json({ error: "Request JSON tidak valid." }, { status: 400 });

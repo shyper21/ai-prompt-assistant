@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { buildGeneratePrdPrompt } from "@/lib/ai-prompts";
-import { generatePRD, type GeneratePRDInput } from "@/lib/generate-prd";
+import { detectProjectDomain, generatePRD, isProjectDomain, type GeneratePRDInput } from "@/lib/generate-prd";
 import type { AppLanguage } from "@/lib/i18n";
 import { callOpenRouter, hasOpenRouterConfig } from "@/lib/openrouter";
+
+type ApiMode = "local" | "economy" | "full";
 
 function isValidInput(value: Partial<GeneratePRDInput>): value is GeneratePRDInput {
   return (
@@ -51,6 +53,10 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<GeneratePRDInput>;
     const language: AppLanguage = body.language === "en" ? "en" : "id";
+    const apiMode: ApiMode =
+      body.apiMode === "local" || body.apiMode === "full" || body.apiMode === "economy"
+        ? body.apiMode
+        : "economy";
 
     if (!isValidInput(body) || !body.idea.trim()) {
       return NextResponse.json(
@@ -59,16 +65,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const localPrd = generatePRD({ ...body, language });
+    const safeInput: GeneratePRDInput = {
+      ...body,
+      language,
+      domain: isProjectDomain(body.domain) ? body.domain : detectProjectDomain(body.idea),
+    };
+    const localPrd = generatePRD(safeInput);
 
-    if (!hasOpenRouterConfig()) {
+    if (apiMode === "local" || !hasOpenRouterConfig()) {
       return NextResponse.json({
-        source: "local",
+        source: "local-fallback",
         fallback: true,
         reason:
-          language === "id"
-            ? "OPENROUTER_API_KEY belum dikonfigurasi. Generator lokal digunakan."
-            : "OPENROUTER_API_KEY is not configured. Local generator was used.",
+          apiMode === "local"
+            ? language === "id"
+              ? "Mode lokal aktif. OpenRouter tidak dipanggil."
+              : "Local mode is active. OpenRouter was not called."
+            : language === "id"
+              ? "OPENROUTER_API_KEY belum dikonfigurasi. Generator lokal digunakan."
+              : "OPENROUTER_API_KEY is not configured. Local generator was used.",
         prd: localPrd,
       });
     }
@@ -76,7 +91,8 @@ export async function POST(request: Request) {
     try {
       const prd = await callOpenRouter({
         temperature: 0.35,
-        maxTokens: 9000,
+        maxTokens: apiMode === "full" ? 5500 : 2800,
+        model: process.env.OPENROUTER_GENERATE_MODEL || "google/gemini-2.0-flash-001",
         messages: [
           {
             role: "system",
@@ -87,14 +103,14 @@ export async function POST(request: Request) {
           },
           {
             role: "user",
-            content: buildGeneratePrdPrompt({ ...body, language }, localPrd),
+            content: buildGeneratePrdPrompt(safeInput, localPrd),
           },
         ],
       });
 
       if (language === "id" && prdBodyHasEnglishSentences(prd)) {
         return NextResponse.json({
-          source: "local",
+          source: "local-fallback",
           fallback: true,
           reason: "Output OpenRouter terdeteksi mencampur kalimat Bahasa Inggris di luar prompt akhir. Generator lokal digunakan.",
           prd: localPrd,
@@ -103,7 +119,7 @@ export async function POST(request: Request) {
 
       if (language === "en" && prdBodyHasIndonesianSentences(prd)) {
         return NextResponse.json({
-          source: "local",
+          source: "local-fallback",
           fallback: true,
           reason: "OpenRouter output mixed Indonesian text into the English PRD. Local generator was used.",
           prd: localPrd,
@@ -117,7 +133,7 @@ export async function POST(request: Request) {
       });
     } catch (error) {
       return NextResponse.json({
-        source: "local",
+        source: "local-fallback",
         fallback: true,
         reason:
           language === "id"
@@ -126,7 +142,7 @@ export async function POST(request: Request) {
         prd: localPrd,
       });
     }
-    } catch {
+  } catch {
     return NextResponse.json({ error: "Request JSON tidak valid." }, { status: 400 });
   }
 }
