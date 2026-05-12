@@ -1,25 +1,31 @@
-# PromptForge AI — Futuristic MVP
+# PromptForge AI - Agent Brief Generator
 
-Website generator PRD dan prompt teknis untuk membantu pengguna mengubah ide aplikasi menjadi brief yang siap dipakai di ChatGPT, Claude, Gemini, Codex, atau developer.
+PromptForge AI membantu pengguna mengubah ide aplikasi menjadi product brief dan prompt teknis yang siap diberikan ke AI coding agent seperti Codex, Claude Code, ChatGPT, atau Gemini.
 
-## Perubahan versi ini
+## Fokus Versi Ini
 
-- UI tidak lagi meniru screenshot awal secara langsung.
-- Tampilan dibuat lebih futuristik dengan glassmorphism, neon glow, gradient, dan grid background.
-- Output prompt dibuat lebih lengkap:
-  - Ringkasan produk
-  - Masalah utama
-  - Target pengguna
-  - Fitur MVP
-  - User flow
-  - Struktur halaman
-  - Tech stack
-  - Database awal
-  - API/server actions
-  - Acceptance criteria
-  - Prompt khusus untuk Codex / AI coding agent
+- UI futuristik original dengan dark background, glassmorphism, grid, dan aksen neon cyan/violet/lime.
+- Generator berjalan lokal tanpa API eksternal.
+- Tidak membutuhkan Firebase, OpenAI API, Supabase, atau secret key.
+- Output bukan PRD pendek, tetapi build brief lengkap untuk implementasi MVP.
 
-## Cara menjalankan lokal
+## Output Generator
+
+Generator menghasilkan:
+
+- Ringkasan produk
+- Masalah utama
+- Target pengguna
+- Fitur MVP
+- User flow
+- Struktur halaman
+- Tech stack rekomendasi
+- Database schema awal
+- API/server actions
+- Acceptance criteria
+- Prompt khusus untuk AI coding agent
+
+## Cara Menjalankan Lokal
 
 ```bash
 npm install
@@ -32,7 +38,7 @@ Buka:
 http://localhost:3000
 ```
 
-## Build production
+## Build Production
 
 ```bash
 npm run build
@@ -40,11 +46,11 @@ npm run build
 
 ## Deploy ke Vercel
 
-1. Upload semua file ke GitHub.
+1. Upload project ke GitHub.
 2. Import repository ke Vercel.
-3. Framework akan terdeteksi sebagai Next.js.
-4. Klik Deploy.
+3. Pastikan framework terdeteksi sebagai Next.js.
+4. Jalankan deploy tanpa environment variable tambahan.
 
 ## Catatan
 
-Versi ini masih local generator, jadi belum membutuhkan OpenAI API, Firebase, atau Supabase.
+Versi ini sengaja memakai generator lokal agar aman untuk MVP awal dan tetap mudah dikembangkan ke database atau AI API di fase berikutnya.
