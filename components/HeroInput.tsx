@@ -38,9 +38,16 @@ export default function HeroInput() {
     setIsGenerating(true);
 
     window.setTimeout(() => {
-      setResult(generatePRD(cleanIdea));
-      setIsGenerating(false);
-    }, 500);
+  setResult(
+    generatePRD({
+      idea: cleanIdea,
+      techMode: "ai",
+      selectedTech: {},
+      answers: [],
+    })
+  );
+  setIsGenerating(false);
+}, 500);
   }
 
   return (
