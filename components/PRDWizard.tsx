@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Circle } from "lucide-react";
 import GeneratedPRD from "@/components/GeneratedPRD";
 import IdeaStep from "@/components/IdeaStep";
 import QuestionsStep from "@/components/QuestionsStep";
 import TechPreferenceStep from "@/components/TechPreferenceStep";
 import {
-  defaultQuestions,
+  detectProjectDomain,
   generatePRD,
+  getDynamicQuestionChips,
+  getDynamicQuestions,
   type PrdAnswer,
   type SelectedTech,
   type TechMode,
@@ -36,17 +38,29 @@ export default function PRDWizard() {
   const [ideaError, setIdeaError] = useState("");
   const [techMode, setTechMode] = useState<TechMode>("ai");
   const [selectedTech, setSelectedTech] = useState<SelectedTech>(defaultTech);
-  const [answers, setAnswers] = useState<PrdAnswer[]>(
-    defaultQuestions.map((question) => ({ question, answer: "" })),
-  );
+  const [answers, setAnswers] = useState<PrdAnswer[]>([]);
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [generatedPrd, setGeneratedPrd] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const domain = useMemo(() => detectProjectDomain(idea), [idea]);
+  const questions = useMemo(() => getDynamicQuestions(domain), [domain]);
+  const questionChips = useMemo(() => getDynamicQuestionChips(domain), [domain]);
 
   const activeStepIndex = useMemo(
     () => stepItems.findIndex((item) => item.id === step),
     [step],
   );
+
+  useEffect(() => {
+    setAnswers((current) =>
+      questions.map((question) => {
+        const existing = current.find((item) => item.question === question);
+        return existing || { question, answer: "" };
+      }),
+    );
+    setActiveQuestion(0);
+  }, [questions]);
 
   function goToTech() {
     const cleanIdea = idea.trim();
@@ -98,7 +112,7 @@ export default function PRDWizard() {
   }
 
   function goToNextQuestion() {
-    if (activeQuestion < defaultQuestions.length - 1) {
+    if (activeQuestion < questions.length - 1) {
       setActiveQuestion((current) => current + 1);
       return;
     }
@@ -174,7 +188,8 @@ export default function PRDWizard() {
 
       {step === "questions" ? (
         <QuestionsStep
-          questions={defaultQuestions}
+          questions={questions}
+          chips={questionChips}
           answers={answers}
           activeQuestion={activeQuestion}
           isGenerating={isGenerating}
@@ -191,7 +206,7 @@ export default function PRDWizard() {
         <GeneratedPRD
           content={generatedPrd}
           isGenerating={isGenerating}
-          onBackToEdit={() => setStep("questions")}
+          onBackToEdit={() => setStep("idea")}
           onRegenerate={handleRegenerate}
         />
       ) : null}

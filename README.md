@@ -6,7 +6,8 @@ PromptForge AI membantu user non-teknis membuat PRD lengkap yang bisa langsung d
 
 - Wizard 4 step: input ide, preferensi teknologi, pertanyaan tambahan, output PRD.
 - Mode teknologi: biarkan AI pilih atau pilih stack sendiri.
-- 5 pertanyaan tambahan dengan input bebas, chip cepat, tombol lewati, dan progress.
+- 5 pertanyaan tambahan dinamis sesuai domain dengan input bebas, chip cepat, tombol lewati, dan progress.
+- Domain detection lokal untuk finance tracker, inventory/stok gudang, booking system, learning app, CRM/sales, task management, content management, e-commerce, SaaS dashboard, dan generic web app.
 - Output Markdown panjang dengan struktur PRD profesional.
 - Copy semua PRD dan download sebagai file `.md`.
 - Generate ulang dan kembali mengedit input.

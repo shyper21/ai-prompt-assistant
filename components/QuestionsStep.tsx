@@ -5,6 +5,7 @@ import type { PrdAnswer } from "@/lib/generate-prd";
 
 type QuestionsStepProps = {
   questions: string[];
+  chips: string[][];
   answers: PrdAnswer[];
   activeQuestion: number;
   isGenerating: boolean;
@@ -16,16 +17,9 @@ type QuestionsStepProps = {
   onGenerate: () => void;
 };
 
-const quickChips = [
-  ["Pemilik bisnis kecil", "Masih pakai spreadsheet", "Untuk kebutuhan pribadi"],
-  ["Tambah data pertama", "Lihat dashboard", "Export laporan"],
-  ["Dashboard", "CRUD data", "Search/filter", "Report/export"],
-  ["Lebih cepat", "Lebih rapi", "Lebih mudah dipantau"],
-  ["Reminder", "Insight bulanan", "Riwayat lengkap", "Progress terlihat"],
-];
-
 export default function QuestionsStep({
   questions,
+  chips,
   answers,
   activeQuestion,
   isGenerating,
@@ -83,7 +77,7 @@ export default function QuestionsStep({
           />
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {(quickChips[activeQuestion] || quickChips[0]).map((chip) => (
+            {(chips[activeQuestion] || chips[0] || []).map((chip) => (
               <button
                 key={chip}
                 type="button"
