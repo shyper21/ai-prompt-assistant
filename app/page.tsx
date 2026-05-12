@@ -10,8 +10,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import HeroInput from "@/components/HeroInput";
 import Navbar from "@/components/Navbar";
+import PRDWizard from "@/components/PRDWizard";
 
 const chips = [
   { label: "Agent-ready brief", icon: Bot },
@@ -38,8 +38,8 @@ const featureCards = [
 ];
 
 const telemetry = [
-  { label: "Sections", value: "11" },
-  { label: "Build mode", value: "Local" },
+  { label: "Wizard", value: "4 steps" },
+  { label: "Sections", value: "10" },
   { label: "Target", value: "AI agents" },
 ];
 
@@ -74,13 +74,13 @@ export default function Home() {
               </div>
 
               <h1 className="max-w-4xl text-4xl font-black text-white sm:text-5xl lg:text-6xl">
-                Ubah ide aplikasi menjadi brief yang siap dieksekusi AI coding agent.
+                Buat PRD lengkap yang siap diberikan ke AI coding agent.
               </h1>
 
               <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-                Tulis ide produk dalam bahasa biasa. PromptForge menyusunnya menjadi
-                blueprint teknis lengkap: MVP, flow, halaman, schema data, server actions,
-                acceptance criteria, dan prompt khusus untuk agent.
+                PromptForge memandu user non-teknis lewat wizard: ide, preferensi teknologi,
+                pertanyaan tambahan, lalu output Markdown panjang untuk ChatGPT, Claude,
+                Gemini, Codex, atau Claude Code.
               </p>
             </div>
 
@@ -127,7 +127,7 @@ export default function Home() {
               </div>
             </div>
 
-            <HeroInput />
+            <PRDWizard />
           </div>
         </section>
 

@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, FileDown, TerminalSquare } from "lucide-react";
+import { ArrowLeft, Check, Copy, FileDown, RotateCcw, TerminalSquare } from "lucide-react";
 
 type GeneratedPRDProps = {
   content: string;
+  isGenerating?: boolean;
+  onBackToEdit?: () => void;
+  onRegenerate?: () => void;
 };
 
-export default function GeneratedPRD({ content }: GeneratedPRDProps) {
+export default function GeneratedPRD({
+  content,
+  isGenerating = false,
+  onBackToEdit,
+  onRegenerate,
+}: GeneratedPRDProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -34,14 +42,38 @@ export default function GeneratedPRD({ content }: GeneratedPRDProps) {
             <TerminalSquare size={15} />
             Agent output
           </div>
-          <h2 className="mt-2 text-xl font-black text-white">Product Brief + Prompt Agent</h2>
+          <h2 className="mt-2 text-xl font-black text-white">PRD Markdown Lengkap</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Gunakan hasil ini untuk ChatGPT, Claude, Gemini, Codex, atau developer.
+            Copy-paste hasil ini ke ChatGPT, Claude, Gemini, Codex, Claude Code, atau developer.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
+          {onBackToEdit ? (
+            <button
+              type="button"
+              onClick={onBackToEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
+            >
+              <ArrowLeft size={17} />
+              Edit input
+            </button>
+          ) : null}
+
+          {onRegenerate ? (
+            <button
+              type="button"
+              onClick={onRegenerate}
+              disabled={isGenerating}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-300/25 bg-violet-300/10 px-4 py-2 text-sm font-bold text-violet-100 transition hover:bg-violet-300/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RotateCcw size={17} />
+              {isGenerating ? "Generating..." : "Generate ulang"}
+            </button>
+          ) : null}
+
           <button
+            type="button"
             onClick={handleDownload}
             className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/[0.06]"
           >
@@ -50,6 +82,7 @@ export default function GeneratedPRD({ content }: GeneratedPRDProps) {
           </button>
 
           <button
+            type="button"
             onClick={handleCopy}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-100"
           >
