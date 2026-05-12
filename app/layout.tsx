@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "PromptForge AI",
-  description: "Ubah ide mentah menjadi prompt dan PRD yang siap dieksekusi AI coding agent.",
+  description: "AI Product Interviewer untuk mengubah ide website mentah menjadi PRD lengkap bagi AI coding tools.",
 };
 
 export default function RootLayout({

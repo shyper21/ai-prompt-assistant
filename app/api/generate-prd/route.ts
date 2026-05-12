@@ -30,7 +30,7 @@ const englishBodyPatterns = [
 ];
 
 function prdBodyHasEnglishSentences(markdown: string) {
-  const marker = "## 10. Prompt untuk AI Coding Agent";
+  const marker = "## 10. Prompt untuk AI Coding Tool";
   const body = markdown.slice(0, markdown.indexOf(marker) === -1 ? markdown.length : markdown.indexOf(marker));
   return englishBodyPatterns.some((pattern) => pattern.test(body));
 }
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 
     try {
       const prd = await callOpenRouter({
-        temperature: 0.35,
+        temperature: 0.3,
         maxTokens: apiMode === "full" ? 5500 : 2800,
         model: process.env.OPENROUTER_GENERATE_MODEL || "google/gemini-2.0-flash-001",
         messages: [
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
             role: "system",
             content:
               language === "id"
-                ? "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. User selected Bahasa Indonesia. All PRD content must be written in Bahasa Indonesia. Do not mix English and Indonesian. Only the final AI Coding Agent prompt may be written in English."
+                ? "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. User selected Bahasa Indonesia. Sections 1-9 must be written in Bahasa Indonesia. Do not mix English and Indonesian. Only the final AI Coding Tool prompt may be written in English. This is not an AI agent builder."
                 : "You are a senior product manager and full-stack architect. Output complete Markdown PRDs only. User selected English. All PRD content must be written in English. Do not use Indonesian sentences.",
           },
           {

@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     try {
       const content = await callOpenRouter({
         temperature: 0.2,
-        maxTokens: apiMode === "full" ? 900 : 700,
+        maxTokens: 800,
         model: process.env.OPENROUTER_ANALYZE_MODEL || "google/gemini-2.0-flash-lite-001",
         messages: [
           {

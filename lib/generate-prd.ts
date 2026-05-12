@@ -15,16 +15,6 @@ export type PrdAnswer = {
   answer: string;
 };
 
-export type GeneratePRDInput = {
-  idea: string;
-  language?: AppLanguage;
-  domain?: ProjectDomain;
-  apiMode?: ApiMode;
-  techMode: TechMode;
-  selectedTech: SelectedTech;
-  answers: PrdAnswer[];
-};
-
 export type ProjectDomain =
   | "finance-tracker"
   | "inventory"
@@ -35,8 +25,61 @@ export type ProjectDomain =
   | "content-management"
   | "e-commerce"
   | "saas-dashboard"
-  | "ai-agent"
   | "generic-web-app";
+
+export type GeneratePRDInput = {
+  idea: string;
+  language?: AppLanguage;
+  domain?: ProjectDomain;
+  apiMode?: ApiMode;
+  techMode: TechMode;
+  selectedTech: SelectedTech;
+  answers: PrdAnswer[];
+};
+
+type Feature = {
+  name: string;
+  description: string;
+  input: string;
+  output: string;
+  notes: string;
+};
+
+type Table = {
+  name: string;
+  description: string;
+  fields: string[];
+};
+
+type DomainProfile = {
+  labelId: string;
+  labelEn: string;
+  projectNameId: string;
+  projectNameEn: string;
+  usersId: string[];
+  usersEn: string[];
+  rolesId: string[];
+  rolesEn: string[];
+  inputsId: string[];
+  inputsEn: string[];
+  storedDataId: string[];
+  storedDataEn: string[];
+  notificationsId: string;
+  notificationsEn: string;
+  pages: string[];
+  questionsId: string[];
+  questionsEn: string[];
+  chipsId: string[][];
+  chipsEn: string[][];
+  featuresId: Feature[];
+  featuresEn: Feature[];
+  tables: Table[];
+  flowId: string[];
+  flowEn: string[];
+  apiActions: string[];
+  designToneId: string;
+  designToneEn: string;
+};
 
 const projectDomains: ProjectDomain[] = [
   "finance-tracker",
@@ -48,7 +91,6 @@ const projectDomains: ProjectDomain[] = [
   "content-management",
   "e-commerce",
   "saas-dashboard",
-  "ai-agent",
   "generic-web-app",
 ];
 
@@ -56,217 +98,8 @@ export function isProjectDomain(value: unknown): value is ProjectDomain {
   return typeof value === "string" && projectDomains.includes(value as ProjectDomain);
 }
 
-type CoreFeature = {
-  name: string;
-  description: string;
-  input: string;
-  output: string;
-  notes: string;
-};
-
-type DatabaseTable = {
-  name: string;
-  description: string;
-  fields: string[];
-};
-
-type DomainProfile = {
-  domain: ProjectDomain;
-  label: string;
-  projectName: string;
-  primaryEntity: string;
-  primaryEntityLabel: string;
-  activityEntity: string;
-  settingsEntity: string;
-  targetUsers: string[];
-  roles: string[];
-  inputMethods: string[];
-  storedData: string[];
-  notifications: string;
-  pages: string[];
-  questions: string[];
-  chips: string[][];
-  features: CoreFeature[];
-  flow: string[];
-  apiActions: string[];
-  acceptance: string[];
-  designTone: string;
-};
-
-type StackRecommendation = {
-  frontend: string;
-  backend: string;
-  database: string;
-  deployment: string;
-  reason: string;
-};
-
-const genericQuestions = [
-  "Ceritakan siapa yang butuh aplikasi ini dan sekarang mereka biasanya melakukan proses ini dengan cara apa?",
-  "Hal apa yang wajib berhasil dilakukan user di kunjungan pertama?",
-  "Fitur apa saja yang wajib ada di versi pertama?",
-  "Apa hal utama yang membuat aplikasi ini lebih enak dipakai dibanding cara lama?",
-  "Apa yang membuat user mau membuka aplikasi ini terus-menerus?",
-];
-
-const genericChips = [
-  ["Pemilik bisnis kecil", "Tim internal", "Pengguna pribadi"],
-  ["Tambah data pertama", "Lihat dashboard", "Cari data lama"],
-  ["Dashboard", "CRUD data", "Search/filter", "Export"],
-  ["Lebih cepat", "Lebih rapi", "Lebih mudah dipantau"],
-  ["Reminder", "Insight berkala", "Riwayat lengkap"],
-];
-
-const englishQuestionsByDomain: Record<ProjectDomain, { questions: string[]; chips: string[][] }> = {
-  "finance-tracker": {
-    questions: [
-      "Is this tracker for personal use, family use, freelancers, or a small business?",
-      "What data should be recorded: income, expenses, debt, bills, budgets, or opening balance?",
-      "Do users need transaction categories and budgets per category?",
-      "Which reports matter most: daily, weekly, monthly, or category-based reports?",
-      "Do users need report export, bill reminders, or budget alerts?",
-    ],
-    chips: [["Personal", "Family", "Freelancer", "Small business"], ["Income", "Expenses", "Debt", "Bills", "Opening balance"], ["Required categories", "Budget per category", "Default categories"], ["Monthly chart", "Category report", "Balance trend"], ["CSV export", "Bill reminder", "Budget alert"]],
-  },
-  inventory: {
-    questions: [
-      "Is this inventory for a small store, warehouse, production, or distribution workflow?",
-      "Do you need batch numbers, expiry dates, SKUs, barcodes, or serial numbers?",
-      "Will stock in and stock out be recorded manually or from orders?",
-      "Do you need shelf locations, branch warehouses, or multi-location stock?",
-      "Do you need low stock alerts and single-admin or multi-admin access?",
-    ],
-    chips: [["Small store", "Warehouse", "Production", "Distribution"], ["Batch number", "Expiry date", "SKU", "Barcode"], ["Manual", "From orders", "CSV import"], ["Shelf location", "Multiple warehouses", "Branches"], ["Low stock alert", "Single admin", "Multiple admins"]],
-  },
-  "booking-system": {
-    questions: ["What service will users book and how long does each service take?", "Should booking use date, time, staff, or location selection?", "Are bookings confirmed automatically or reviewed by an admin?", "Which statuses are needed?", "Do you need reminders, deposits, payments, or customer notes?"],
-    chips: [["Appointment", "Rental", "Class", "Consultation"], ["Date", "Time", "Staff", "Location"], ["Auto confirmed", "Admin approval", "Waitlist"], ["Pending", "Confirmed", "Completed", "Cancelled"], ["Reminder", "Deposit", "Payment note", "Customer notes"]],
-  },
-  "learning-app": {
-    questions: ["Who are the learners: children, school students, employees, or a community?", "What content format is needed: text, video, quizzes, flashcards, or assignments?", "Do you need progress tracking, scoring, certificates, or leaderboard?", "Is there a teacher or mentor role for feedback?", "What keeps learners coming back every day?"],
-    chips: [["Children", "Students", "Employees", "Community"], ["Text", "Video", "Quiz", "Flashcards"], ["Progress", "Scoring", "Certificate", "Leaderboard"], ["Teacher", "Mentor", "Self-paced"], ["Streak", "Reminder", "Badge", "Daily target"]],
-  },
-  "crm-sales": {
-    questions: ["Who will use this CRM: founder, solo salesperson, or sales team?", "What pipeline stages are needed from lead to close?", "What lead data must be stored?", "Do you need follow-up reminders and activity logs?", "Which sales report matters most?"],
-    chips: [["Founder", "Solo sales", "Sales team"], ["New", "Qualified", "Proposal", "Won/Lost"], ["Contact", "Company", "Source", "Deal value"], ["Follow-up reminder", "Activity log", "Email note"], ["Conversion", "Forecast", "Source report", "Deal value"]],
-  },
-  "task-management": {
-    questions: ["Is this for personal tasks, a small team, or multiple projects?", "Which workflow statuses are needed?", "Do you need assignees, deadlines, priorities, tags, or subtasks?", "Do users need Kanban, list, calendar, or all views?", "Which report matters most?"],
-    chips: [["Personal", "Small team", "Multiple projects"], ["Todo", "Doing", "Review", "Done", "Blocked"], ["Assignee", "Deadline", "Priority", "Subtasks"], ["Kanban", "List", "Calendar"], ["Overdue", "Workload", "Completion rate"]],
-  },
-  "content-management": {
-    questions: ["What content will be managed: blog posts, articles, landing pages, docs, or social content?", "Which editorial workflow is needed?", "Will there be multiple authors/editors or a single admin?", "Do you need categories, tags, SEO fields, and revision history?", "Will publishing happen inside the app or is it internal management only?"],
-    chips: [["Blog", "Articles", "Documentation", "Social content"], ["Draft", "Review", "Scheduled", "Published"], ["Single admin", "Multiple authors", "Editor approval"], ["SEO fields", "Tags", "Revision history"], ["Publish directly", "Internal only", "Export content"]],
-  },
-  "e-commerce": {
-    questions: ["Are the products physical, digital, services, or mixed?", "Do you need online payment now or manual orders first?", "Do products need variants such as size, color, package, or variant stock?", "Which order statuses are needed?", "Does admin need catalog, stock, promo, and sales reports?"],
-    chips: [["Physical", "Digital", "Service", "Mixed"], ["Manual order", "Payment later", "Payment gateway later"], ["Size", "Color", "Package", "Variant stock"], ["Pending", "Paid", "Shipped", "Completed"], ["Catalog", "Stock", "Promo", "Sales report"]],
-  },
-  "saas-dashboard": {
-    questions: ["What metrics should this dashboard monitor?", "Is this multi-tenant, single workspace, or internal only?", "Which user roles are needed?", "Will metrics be entered manually first or imported later?", "Which report and alert are most important?"],
-    chips: [["Revenue", "Users", "Operations", "Marketing", "Support"], ["Multi-tenant", "Single workspace", "Internal dashboard"], ["Owner", "Admin", "Member", "Viewer"], ["Manual input", "CSV import", "API later"], ["Weekly report", "Anomaly alert", "Target tracking"]],
-  },
-  "ai-agent": {
-    questions: ["What daily activities should this AI agent help with?", "Should the agent only suggest actions or execute actions automatically?", "What data sources can the agent access?", "Does the agent need long-term memory?", "What integrations are required?"],
-    chips: [["Research", "Administration", "Data analysis", "Customer support"], ["Suggestions only", "Actions with approval", "Limited automatic actions"], ["Documents", "Email", "CRM", "Internal database"], ["No memory", "Per-user memory", "Per-project memory"], ["Google Drive", "Slack", "Email", "Internal API"]],
-  },
-  "generic-web-app": {
-    questions: genericQuestions.map((_, index) => ["Who needs this application and how do they solve the process today?", "What must users successfully do on their first visit?", "Which features are required in the first version?", "What makes this app easier than the old workflow?", "What makes users return repeatedly?"][index]),
-    chips: [["Small business owner", "Internal team", "Personal user"], ["Create first data", "View dashboard", "Find old data"], ["Dashboard", "CRUD data", "Search/filter", "Export"], ["Faster", "Cleaner", "Easier to monitor"], ["Reminder", "Recurring insight", "Complete history"]],
-  },
-};
-
 function cleanText(text: string) {
   return text.replace(/[\n\r]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function normalizeUserFacingText(text: string) {
-  return text
-    .replace(/\bUser\b/g, "Pengguna")
-    .replace(/\buser\b/g, "pengguna")
-    .replace(/\bUsers\b/g, "Pengguna")
-    .replace(/\bCustomer\b/g, "Pelanggan")
-    .replace(/\bcustomer\b/g, "pelanggan")
-    .replace(/\bCustomers\b/g, "Pelanggan")
-    .replace(/\bStaff\b/g, "Staf")
-    .replace(/\bstaff\b/g, "staf")
-    .replace(/\bOwner\b/g, "Pemilik")
-    .replace(/\bowner\b/g, "pemilik")
-    .replace(/\bManager\b/g, "Manajer")
-    .replace(/\bWriter\b/g, "Penulis")
-    .replace(/\bTeacher\b/g, "Guru")
-    .replace(/\bStudent\b/g, "Siswa")
-    .replace(/\bLearner\b/g, "Peserta belajar")
-    .replace(/\bMember\b/g, "Anggota")
-    .replace(/\bStock\b/g, "Stok")
-    .replace(/\bstock\b/g, "stok")
-    .replace(/\bExport\b/g, "Ekspor")
-    .replace(/\bexport\b/g, "ekspor")
-    .replace(/\bAlert\b/g, "Peringatan")
-    .replace(/\bAlerts\b/g, "Peringatan")
-    .replace(/\balert\b/g, "peringatan")
-    .replace(/\bReminder\b/g, "Pengingat")
-    .replace(/\bReminders\b/g, "Pengingat")
-    .replace(/\bReports\b/g, "Laporan")
-    .replace(/\bReport\b/g, "Laporan")
-    .replace(/\breport\b/g, "laporan")
-    .replace(/\bSettings\b/g, "Pengaturan")
-    .replace(/\bSetting\b/g, "Pengaturan")
-    .replace(/\bProducts\b/g, "Produk")
-    .replace(/\bProduct\b/g, "Produk")
-    .replace(/\bOrders\b/g, "Pesanan")
-    .replace(/\bOrder\b/g, "Pesanan")
-    .replace(/\bLeads\b/g, "Lead")
-    .replace(/\bTasks\b/g, "Tugas")
-    .replace(/\bTask\b/g, "Tugas")
-    .replace(/\bPosts\b/g, "Konten")
-    .replace(/\bPost\b/g, "Konten")
-    .replace(/\bDashboard Inventory\b/g, "Dashboard Inventori")
-    .replace(/\bBooking Form\b/g, "Form Booking")
-    .replace(/\bSchedule Calendar\b/g, "Kalender Jadwal")
-    .replace(/\bLearning Dashboard\b/g, "Dashboard Belajar")
-    .replace(/\bSales Dashboard\b/g, "Dashboard Penjualan")
-    .replace(/\bTask Dashboard\b/g, "Dashboard Tugas")
-    .replace(/\bContent Dashboard\b/g, "Dashboard Konten")
-    .replace(/\bProduct Catalog\b/g, "Katalog Produk")
-    .replace(/\bStorefront\b/g, "Etalase Toko")
-    .replace(/\bOverview Dashboard\b/g, "Dashboard Ringkasan")
-    .replace(/\bLow budget alert\b/g, "Peringatan budget rendah")
-    .replace(/\bLow stock alert\b/g, "Peringatan stok rendah")
-    .replace(/\bAuto confirmed\b/g, "Konfirmasi otomatis")
-    .replace(/\bWaitlist\b/g, "Daftar tunggu")
-    .replace(/\bSelf-paced\b/g, "Belajar mandiri")
-    .replace(/\bStreak\b/g, "Rangkaian belajar")
-    .replace(/\bBadge\b/g, "Lencana")
-    .replace(/\bReminder follow-up\b/g, "Pengingat follow-up")
-    .replace(/\bEmail note\b/g, "Catatan email")
-    .replace(/\bPublish langsung\b/g, "Terbitkan langsung")
-    .replace(/\bExport content\b/g, "Ekspor konten")
-    .replace(/\bRevenue\b/g, "Pendapatan")
-    .replace(/\bOperations\b/g, "Operasional")
-    .replace(/\bSupport\b/g, "Dukungan")
-    .replace(/\bRegistered pengguna\b/g, "Pengguna terdaftar")
-    .replace(/\bHousehold admin\b/g, "Admin keluarga")
-    .replace(/\bBusiness pemilik\b/g, "Pemilik bisnis")
-    .replace(/\bWarehouse staf\b/g, "Staf gudang")
-    .replace(/\bStore admin\b/g, "Admin toko")
-    .replace(/\bFulfillment staf\b/g, "Staf fulfillment")
-    .replace(/\bProject manajer\b/g, "Manajer proyek")
-    .replace(/\bSales manajer\b/g, "Manajer sales")
-    .replace("## 4. Pengguna Flow", "## 4. User Flow");
-}
-
-function normalizePrdExceptFinalPrompt(markdown: string) {
-  const marker = "## 10. Prompt untuk AI Coding Agent";
-  const index = markdown.indexOf(marker);
-
-  if (index === -1) {
-    return normalizeUserFacingText(markdown);
-  }
-
-  const beforeFinalPrompt = markdown.slice(0, index);
-  const finalPrompt = markdown.slice(index);
-  return `${normalizeUserFacingText(beforeFinalPrompt)}${finalPrompt}`;
 }
 
 function includesAny(text: string, keywords: string[]) {
@@ -274,14 +107,556 @@ function includesAny(text: string, keywords: string[]) {
   return keywords.some((keyword) => lower.includes(keyword));
 }
 
-function titleCase(text: string) {
-  return cleanText(text)
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 5)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
+function feature(name: string, description: string, input: string, output: string, notes: string): Feature {
+  return { name, description, input, output, notes };
 }
+
+const discoveryQuestionsId = [
+  "Website ini akan dipakai oleh siapa dan mereka sekarang menyelesaikan masalah ini dengan cara apa?",
+  "Masalah utama apa yang paling ingin diselesaikan oleh website ini?",
+  "Fitur wajib apa saja yang harus ada di versi pertama agar website ini berguna?",
+  "Data apa saja yang perlu disimpan, dilihat ulang, dicari, atau diedit oleh user?",
+  "Apakah website ini membutuhkan login, dashboard, laporan/export, notifikasi, atau admin panel? Jelaskan yang wajib.",
+];
+
+const discoveryQuestionsEn = [
+  "Who will use this website and how do they currently solve this problem?",
+  "What is the main problem this website must solve?",
+  "Which must-have features are required in the first version?",
+  "What data must users save, review, search, or edit?",
+  "Does this website need login, dashboard, reports/export, notifications, or an admin panel? Explain what is required.",
+];
+
+const discoveryChipsId = [
+  ["Pemula", "Pelanggan", "Admin", "Tim internal"],
+  ["Proses manual", "Data berantakan", "Sulit dipantau", "Butuh booking"],
+  ["Dashboard", "Form input", "CRUD data", "Search/filter"],
+  ["User", "Produk", "Transaksi", "Jadwal", "Laporan"],
+  ["Login", "Dashboard", "Export", "Notifikasi", "Admin panel"],
+];
+
+const discoveryChipsEn = [
+  ["Beginners", "Customers", "Admin", "Internal team"],
+  ["Manual process", "Messy data", "Hard to monitor", "Needs booking"],
+  ["Dashboard", "Input form", "CRUD data", "Search/filter"],
+  ["Users", "Products", "Transactions", "Schedules", "Reports"],
+  ["Login", "Dashboard", "Export", "Notifications", "Admin panel"],
+];
+
+const profiles: Record<ProjectDomain, DomainProfile> = {
+  inventory: {
+    labelId: "Manajemen Stok Gudang",
+    labelEn: "Inventory Management",
+    projectNameId: "Website Pencatat Stok Gudang",
+    projectNameEn: "Warehouse Stock Tracker",
+    usersId: ["Pemilik usaha kecil", "Admin gudang", "Staf operasional"],
+    usersEn: ["Small business owner", "Warehouse admin", "Operations staff"],
+    rolesId: ["Owner", "Admin gudang", "Staf input stok"],
+    rolesEn: ["Owner", "Warehouse admin", "Stock entry staff"],
+    inputsId: ["Produk", "SKU", "stok masuk", "stok keluar", "lokasi rak", "supplier"],
+    inputsEn: ["Products", "SKUs", "stock in", "stock out", "shelf location", "supplier"],
+    storedDataId: ["users", "products", "suppliers", "stock_movements", "warehouse_locations"],
+    storedDataEn: ["users", "products", "suppliers", "stock_movements", "warehouse_locations"],
+    notificationsId: "Peringatan stok minimum, stok kosong, dan pergerakan stok yang perlu ditinjau.",
+    notificationsEn: "Low-stock, out-of-stock, and stock movement review alerts.",
+    pages: ["Dashboard", "Produk", "Stok Masuk", "Stok Keluar", "Riwayat Stok", "Laporan", "Admin"],
+    questionsId: [
+      "Stok ini untuk toko kecil, gudang, produksi, atau distribusi?",
+      "Data produk apa yang wajib ada: SKU, barcode, batch, expiry date, lokasi rak, atau supplier?",
+      "Siapa saja yang boleh menambah stok masuk dan mencatat stok keluar?",
+      "Apakah perlu dashboard stok minimum, laporan riwayat, dan export CSV/PDF?",
+      "Apakah perlu login dan admin panel untuk mengatur produk, user, dan supplier?",
+    ],
+    questionsEn: [
+      "Is this for a small store, warehouse, production, or distribution workflow?",
+      "Which product data is required: SKU, barcode, batch, expiry date, shelf location, or supplier?",
+      "Who can add stock in and record stock out?",
+      "Do you need low-stock dashboard, history reports, and CSV/PDF export?",
+      "Do you need login and an admin panel to manage products, users, and suppliers?",
+    ],
+    chipsId: [
+      ["Toko kecil", "Gudang", "Produksi", "Distribusi"],
+      ["SKU", "Barcode", "Batch", "Expiry date", "Lokasi rak"],
+      ["Owner", "Admin gudang", "Staf"],
+      ["Stok minimum", "Riwayat", "Export CSV", "Export PDF"],
+      ["Login", "Admin panel", "Multi user"],
+    ],
+    chipsEn: [
+      ["Small store", "Warehouse", "Production", "Distribution"],
+      ["SKU", "Barcode", "Batch", "Expiry date", "Shelf location"],
+      ["Owner", "Warehouse admin", "Staff"],
+      ["Low stock", "History", "CSV export", "PDF export"],
+      ["Login", "Admin panel", "Multi user"],
+    ],
+    featuresId: [
+      feature("Dashboard Utama", "Menampilkan total produk, stok menipis, stok kosong, dan aktivitas stok terbaru.", "Data produk dan stock_movements.", "Ringkasan stok yang mudah dipantau.", "Prioritaskan angka besar, status warna, dan tabel aktivitas terbaru."),
+      feature("Manajemen Produk", "User dapat menambah, mengedit, menghapus, dan mencari produk.", "Nama produk, SKU, kategori, stok minimum, lokasi, supplier.", "Produk tersimpan dan muncul di dashboard.", "Validasi SKU unik jika digunakan."),
+      feature("Stok Masuk", "Mencatat penambahan stok dari pembelian, retur, atau produksi.", "Produk, jumlah, tanggal, supplier, catatan.", "Stok produk bertambah dan riwayat tersimpan.", "Jumlah wajib angka positif."),
+      feature("Stok Keluar", "Mencatat pengurangan stok untuk penjualan, pemakaian, rusak, atau transfer.", "Produk, jumlah, tanggal, alasan, catatan.", "Stok berkurang dan sistem mencegah stok negatif.", "Berikan error jika jumlah melebihi stok tersedia."),
+      feature("Laporan Riwayat", "User dapat melihat, memfilter, dan mengekspor riwayat stok.", "Tanggal, produk, tipe pergerakan, keyword.", "Tabel riwayat dan file export.", "Export berjalan dari data yang sudah difilter."),
+    ],
+    featuresEn: [
+      feature("Main Dashboard", "Shows total products, low stock, empty stock, and recent stock activity.", "Product and stock movement data.", "A scannable inventory summary.", "Prioritize large numbers, status colors, and recent activity."),
+      feature("Product Management", "Users can create, edit, delete, and search products.", "Product name, SKU, category, minimum stock, location, supplier.", "Saved products appear in dashboard.", "Validate unique SKU if used."),
+      feature("Stock In", "Records incoming stock from purchase, return, or production.", "Product, quantity, date, supplier, notes.", "Product stock increases and history is saved.", "Quantity must be positive."),
+      feature("Stock Out", "Records outgoing stock for sale, usage, damage, or transfer.", "Product, quantity, date, reason, notes.", "Stock decreases and negative stock is prevented.", "Show error when quantity exceeds available stock."),
+      feature("History Reports", "Users can view, filter, and export stock history.", "Date, product, movement type, keyword.", "History table and export file.", "Export must respect active filters."),
+    ],
+    tables: [
+      { name: "users", description: "Data akun dan role pengguna.", fields: ["id int PK", "name string", "email string", "role string", "created_at datetime"] },
+      { name: "products", description: "Master data produk yang stoknya dipantau.", fields: ["id int PK", "name string", "sku string", "category string", "minimum_stock int", "current_stock int", "location_id int FK", "supplier_id int FK", "created_at datetime"] },
+      { name: "suppliers", description: "Data supplier atau sumber barang.", fields: ["id int PK", "name string", "phone string", "address text", "created_at datetime"] },
+      { name: "warehouse_locations", description: "Lokasi rak, gudang, atau cabang penyimpanan.", fields: ["id int PK", "name string", "code string", "description text"] },
+      { name: "stock_movements", description: "Riwayat stok masuk dan stok keluar.", fields: ["id int PK", "product_id int FK", "user_id int FK", "type string", "quantity int", "reason string", "notes text", "created_at datetime"] },
+    ],
+    flowId: ["User login atau masuk sebagai demo.", "Admin menambahkan produk, supplier, dan lokasi rak.", "Staf mencatat stok masuk atau stok keluar.", "Sistem memvalidasi jumlah dan memperbarui stok.", "Dashboard menampilkan stok terbaru dan alert stok minimum.", "User melihat riwayat lalu export laporan jika dibutuhkan."],
+    flowEn: ["User logs in or enters demo mode.", "Admin adds products, suppliers, and shelf locations.", "Staff records stock in or stock out.", "System validates quantity and updates stock.", "Dashboard shows latest stock and low-stock alerts.", "User reviews history and exports reports when needed."],
+    apiActions: ["createProduct(data)", "updateProduct(id, data)", "deleteProduct(id)", "createStockMovement(data)", "getInventoryDashboard(filters)", "exportStockMovements(filters)"],
+    designToneId: "Dashboard operasional yang padat, rapi, mudah dipindai, dan memakai warna status untuk stok aman, menipis, dan kosong.",
+    designToneEn: "A dense, tidy operational dashboard with clear status colors for healthy, low, and empty stock.",
+  },
+  "finance-tracker": {
+    labelId: "Pencatat Keuangan Harian",
+    labelEn: "Daily Finance Tracker",
+    projectNameId: "Aplikasi Keuangan Harian",
+    projectNameEn: "Daily Finance Tracker",
+    usersId: ["Pengguna pribadi", "Keluarga", "Freelancer", "Pemilik usaha kecil"],
+    usersEn: ["Personal users", "Families", "Freelancers", "Small business owners"],
+    rolesId: ["User pribadi", "Admin keluarga", "Owner bisnis"],
+    rolesEn: ["Personal user", "Family admin", "Business owner"],
+    inputsId: ["Pemasukan", "pengeluaran", "kategori", "akun", "budget", "tagihan"],
+    inputsEn: ["Income", "expenses", "categories", "accounts", "budgets", "bills"],
+    storedDataId: ["users", "accounts", "categories", "transactions", "budgets", "recurring_bills"],
+    storedDataEn: ["users", "accounts", "categories", "transactions", "budgets", "recurring_bills"],
+    notificationsId: "Alert budget hampir habis, tagihan jatuh tempo, dan pengeluaran melewati batas.",
+    notificationsEn: "Budget limit, upcoming bill, and overspending alerts.",
+    pages: ["Dashboard", "Transaksi", "Tambah Transaksi", "Kategori", "Budget", "Tagihan", "Laporan", "Export"],
+    questionsId: [
+      "Aplikasi keuangan ini untuk pribadi, keluarga, freelancer, atau bisnis kecil?",
+      "Data apa yang wajib dicatat: pemasukan, pengeluaran, hutang, tagihan, budget, atau saldo awal?",
+      "Apakah perlu kategori transaksi, akun/dompet berbeda, dan budget per kategori?",
+      "Laporan apa yang paling penting: harian, mingguan, bulanan, per kategori, atau per akun?",
+      "Apakah perlu login, reminder tagihan, alert budget, dan export CSV/PDF?",
+    ],
+    questionsEn: [
+      "Is this finance app for personal use, family use, freelancers, or a small business?",
+      "What must be recorded: income, expenses, debt, bills, budgets, or opening balance?",
+      "Do you need transaction categories, multiple accounts/wallets, and category budgets?",
+      "Which reports matter most: daily, weekly, monthly, by category, or by account?",
+      "Do you need login, bill reminders, budget alerts, and CSV/PDF export?",
+    ],
+    chipsId: [["Pribadi", "Keluarga", "Freelancer", "Bisnis kecil"], ["Pemasukan", "Pengeluaran", "Hutang", "Tagihan", "Budget"], ["Kategori", "Multi akun", "Budget kategori"], ["Bulanan", "Per kategori", "Per akun"], ["Login", "Reminder", "Export CSV"]],
+    chipsEn: [["Personal", "Family", "Freelancer", "Small business"], ["Income", "Expenses", "Debt", "Bills", "Budget"], ["Categories", "Multi account", "Category budget"], ["Monthly", "By category", "By account"], ["Login", "Reminder", "CSV export"]],
+    featuresId: [
+      feature("Dashboard Keuangan", "Menampilkan saldo, pemasukan, pengeluaran, sisa budget, dan transaksi terbaru.", "Transaksi, akun, kategori, budget.", "Ringkasan cashflow dan grafik sederhana.", "Dashboard harus tetap berguna dengan data dummy."),
+      feature("Pencatatan Pemasukan", "User mencatat pemasukan dari gaji, penjualan, bonus, atau sumber lain.", "Nominal, tanggal, akun, kategori, catatan.", "Saldo akun bertambah dan transaksi tersimpan.", "Nominal wajib positif."),
+      feature("Pencatatan Pengeluaran", "User mencatat pengeluaran harian dan mengelompokkannya.", "Nominal, tanggal, akun, kategori, catatan.", "Saldo akun berkurang dan laporan diperbarui.", "Berikan validasi untuk data kosong."),
+      feature("Kategori Transaksi", "User membuat kategori dan budget agar pengeluaran mudah dianalisis.", "Nama kategori, tipe, warna, limit bulanan.", "Kategori muncul di form dan laporan.", "Sediakan kategori default."),
+      feature("Grafik Bulanan", "Menampilkan tren pemasukan, pengeluaran, dan kategori terbesar.", "Rentang bulan dan filter akun.", "Grafik dan insight bulanan.", "Gunakan chart sederhana tanpa API eksternal."),
+      feature("Export Laporan", "User mengekspor transaksi sesuai filter.", "Periode, kategori, akun, format.", "CSV atau print-friendly report.", "Export harus jelas untuk arsip pribadi."),
+    ],
+    featuresEn: [
+      feature("Finance Dashboard", "Shows balance, income, expenses, remaining budget, and recent transactions.", "Transactions, accounts, categories, budgets.", "Cashflow summary and simple charts.", "Dashboard must be useful with dummy data."),
+      feature("Income Entry", "Users record income from salary, sales, bonus, or other sources.", "Amount, date, account, category, notes.", "Account balance increases and transaction is saved.", "Amount must be positive."),
+      feature("Expense Entry", "Users record daily expenses and categorize them.", "Amount, date, account, category, notes.", "Account balance decreases and reports update.", "Validate empty data."),
+      feature("Transaction Categories", "Users create categories and budgets for easier analysis.", "Category name, type, color, monthly limit.", "Categories appear in forms and reports.", "Provide default categories."),
+      feature("Monthly Charts", "Shows income, expenses, and top categories over time.", "Month range and account filter.", "Charts and monthly insight.", "Use simple charts without external APIs."),
+      feature("Report Export", "Users export filtered transactions.", "Period, category, account, format.", "CSV or print-friendly report.", "Export must be useful for personal records."),
+    ],
+    tables: [
+      { name: "users", description: "Data akun pengguna.", fields: ["id int PK", "name string", "email string", "role string", "created_at datetime"] },
+      { name: "accounts", description: "Dompet, rekening, atau sumber saldo.", fields: ["id int PK", "user_id int FK", "name string", "type string", "opening_balance decimal", "current_balance decimal"] },
+      { name: "categories", description: "Kategori pemasukan dan pengeluaran.", fields: ["id int PK", "user_id int FK", "name string", "type string", "color string", "monthly_limit decimal"] },
+      { name: "transactions", description: "Data pemasukan dan pengeluaran harian.", fields: ["id int PK", "user_id int FK", "account_id int FK", "category_id int FK", "type string", "amount decimal", "date date", "notes text"] },
+      { name: "budgets", description: "Target atau batas budget bulanan.", fields: ["id int PK", "user_id int FK", "category_id int FK", "month string", "limit_amount decimal"] },
+      { name: "recurring_bills", description: "Tagihan rutin dan reminder.", fields: ["id int PK", "user_id int FK", "name string", "amount decimal", "due_day int", "status string"] },
+    ],
+    flowId: ["User login atau masuk mode demo.", "User mengatur akun/dompet dan kategori awal.", "User menambah pemasukan atau pengeluaran.", "Dashboard memperbarui saldo dan metrik bulanan.", "User memfilter transaksi dan melihat grafik.", "User export laporan untuk arsip."],
+    flowEn: ["User logs in or enters demo mode.", "User sets accounts/wallets and starter categories.", "User adds income or expense.", "Dashboard updates balance and monthly metrics.", "User filters transactions and reviews charts.", "User exports reports for records."],
+    apiActions: ["createTransaction(data)", "updateTransaction(id, data)", "deleteTransaction(id)", "getFinanceDashboard(filters)", "createCategory(data)", "exportTransactions(filters)"],
+    designToneId: "Dashboard finansial yang tenang, jelas, dan menonjolkan angka penting tanpa dekorasi berlebihan.",
+    designToneEn: "A calm, clear finance dashboard that highlights important numbers without excessive decoration.",
+  },
+  "booking-system": {
+    labelId: "Sistem Booking Layanan",
+    labelEn: "Service Booking System",
+    projectNameId: "Website Booking Layanan",
+    projectNameEn: "Service Booking Website",
+    usersId: ["Pelanggan", "Admin layanan", "Owner bisnis jasa"],
+    usersEn: ["Customers", "Service admin", "Service business owner"],
+    rolesId: ["Customer", "Admin", "Owner"],
+    rolesEn: ["Customer", "Admin", "Owner"],
+    inputsId: ["Layanan", "jadwal", "booking", "data pelanggan", "status pesanan", "pembayaran"],
+    inputsEn: ["Services", "schedules", "bookings", "customer data", "order status", "payments"],
+    storedDataId: ["users", "services", "bookings", "schedules", "payments"],
+    storedDataEn: ["users", "services", "bookings", "schedules", "payments"],
+    notificationsId: "Notifikasi status booking, reminder jadwal, dan perubahan pesanan.",
+    notificationsEn: "Booking status, schedule reminder, and order update notifications.",
+    pages: ["Landing Page Layanan", "Form Booking", "Jadwal", "Status Pesanan", "Dashboard Admin", "Laporan Booking"],
+    questionsId: ["Layanan apa yang akan dibooking dan berapa durasi tiap layanan?", "Apakah user memilih tanggal, jam, staff, lokasi, atau paket layanan?", "Apakah booking langsung diterima atau perlu approval admin?", "Status pesanan apa saja yang dibutuhkan?", "Apakah perlu pembayaran, DP, reminder, laporan, dan admin panel?"],
+    questionsEn: ["What service will users book and how long does each service take?", "Will users choose date, time, staff, location, or service package?", "Are bookings auto-confirmed or approved by admin?", "Which order statuses are needed?", "Do you need payment, deposit, reminders, reports, and admin panel?"],
+    chipsId: [["Laundry", "Salon", "Konsultasi", "Rental"], ["Tanggal", "Jam", "Staff", "Lokasi"], ["Auto confirm", "Approval admin"], ["Pending", "Confirmed", "Completed", "Cancelled"], ["DP", "Reminder", "Laporan", "Admin panel"]],
+    chipsEn: [["Laundry", "Salon", "Consultation", "Rental"], ["Date", "Time", "Staff", "Location"], ["Auto confirm", "Admin approval"], ["Pending", "Confirmed", "Completed", "Cancelled"], ["Deposit", "Reminder", "Reports", "Admin panel"]],
+    featuresId: [
+      feature("Landing Page Layanan", "Menampilkan daftar layanan, harga, durasi, dan CTA booking.", "Data layanan dan paket.", "Halaman layanan yang mudah dipilih pelanggan.", "Jangan hanya marketing, CTA harus masuk ke flow booking."),
+      feature("Form Booking", "Pelanggan mengisi data booking dengan tanggal, jam, layanan, dan kontak.", "Nama, kontak, layanan, slot, catatan.", "Booking tersimpan dengan status awal.", "Form wajib validasi data kontak dan slot."),
+      feature("Manajemen Jadwal", "Admin mengatur slot tersedia dan melihat benturan jadwal.", "Tanggal, jam, kapasitas, staff.", "Slot booking tersedia atau penuh.", "Cegah double booking."),
+      feature("Status Pesanan", "Pelanggan dan admin dapat melihat status booking.", "Kode booking atau login.", "Status pending, confirmed, completed, cancelled.", "Status harus jelas dan mudah dilacak."),
+      feature("Dashboard Admin", "Admin memantau booking hari ini, total booking, dan status pesanan.", "Data booking dan filter tanggal.", "Ringkasan operasional.", "Berikan aksi ubah status cepat."),
+      feature("Laporan Booking", "Admin melihat riwayat booking dan export laporan.", "Periode, layanan, status.", "Tabel laporan dan export.", "Export CSV cukup untuk MVP."),
+    ],
+    featuresEn: [
+      feature("Service Landing Page", "Shows services, prices, duration, and booking CTA.", "Service and package data.", "A service page customers can choose from.", "CTA must enter the booking flow."),
+      feature("Booking Form", "Customers submit bookings with date, time, service, and contact.", "Name, contact, service, slot, notes.", "Booking is saved with initial status.", "Validate contact data and slot."),
+      feature("Schedule Management", "Admin manages available slots and schedule conflicts.", "Date, time, capacity, staff.", "Available or full booking slots.", "Prevent double booking."),
+      feature("Order Status", "Customers and admins can view booking status.", "Booking code or login.", "Pending, confirmed, completed, cancelled status.", "Status must be easy to track."),
+      feature("Admin Dashboard", "Admin monitors today's bookings, total bookings, and order status.", "Booking data and date filters.", "Operational summary.", "Include quick status actions."),
+      feature("Booking Reports", "Admin views booking history and exports reports.", "Period, service, status.", "Report table and export.", "CSV export is enough for MVP."),
+    ],
+    tables: [
+      { name: "users", description: "Data customer dan admin.", fields: ["id int PK", "name string", "email string", "phone string", "role string"] },
+      { name: "services", description: "Daftar layanan yang bisa dibooking.", fields: ["id int PK", "name string", "description text", "duration_minutes int", "price decimal", "is_active boolean"] },
+      { name: "schedules", description: "Slot jadwal yang tersedia.", fields: ["id int PK", "service_id int FK", "staff_name string", "start_time datetime", "end_time datetime", "capacity int", "status string"] },
+      { name: "bookings", description: "Data booking pelanggan.", fields: ["id int PK", "user_id int FK", "service_id int FK", "schedule_id int FK", "status string", "notes text", "created_at datetime"] },
+      { name: "payments", description: "Catatan pembayaran atau DP.", fields: ["id int PK", "booking_id int FK", "amount decimal", "method string", "status string", "paid_at datetime"] },
+    ],
+    flowId: ["Pelanggan membuka landing page layanan.", "Pelanggan memilih layanan dan slot jadwal.", "Pelanggan mengisi form booking.", "Sistem menyimpan booking dan memberi status awal.", "Admin melihat booking di dashboard dan mengubah status.", "Pelanggan mengecek status dan admin export laporan."],
+    flowEn: ["Customer opens service landing page.", "Customer chooses service and schedule slot.", "Customer fills booking form.", "System saves booking and returns initial status.", "Admin reviews booking and changes status.", "Customer checks status and admin exports reports."],
+    apiActions: ["createBooking(data)", "updateBookingStatus(id, status)", "getAvailableSchedules(filters)", "createService(data)", "updateSchedule(id, data)", "exportBookings(filters)"],
+    designToneId: "Tampilan booking yang sederhana, cepat, dan jelas dengan status pesanan yang mudah dipahami.",
+    designToneEn: "A simple, fast, clear booking interface with easy-to-understand order status.",
+  },
+  "learning-app": {
+    labelId: "Aplikasi Belajar",
+    labelEn: "Learning Application",
+    projectNameId: "Website Belajar Online",
+    projectNameEn: "Online Learning Website",
+    usersId: ["Siswa", "Mentor", "Admin konten"],
+    usersEn: ["Learners", "Mentors", "Content admins"],
+    rolesId: ["Siswa", "Mentor", "Admin"],
+    rolesEn: ["Learner", "Mentor", "Admin"],
+    inputsId: ["Materi", "kelas", "kuis", "progress", "nilai"],
+    inputsEn: ["Lessons", "classes", "quizzes", "progress", "scores"],
+    storedDataId: ["users", "courses", "lessons", "quizzes", "progress_records"],
+    storedDataEn: ["users", "courses", "lessons", "quizzes", "progress_records"],
+    notificationsId: "Reminder belajar, materi baru, dan progress belum selesai.",
+    notificationsEn: "Study reminders, new content, and incomplete progress alerts.",
+    pages: ["Dashboard Belajar", "Katalog Kelas", "Detail Materi", "Kuis", "Progress", "Admin Konten"],
+    questionsId: ["Siapa peserta belajarnya dan level mereka apa?", "Format materi apa yang wajib ada: teks, video, kuis, atau tugas?", "Apakah perlu progress, nilai, sertifikat, atau leaderboard?", "Apakah ada mentor/admin yang memberi feedback?", "Apakah perlu login, reminder, dan dashboard admin konten?"],
+    questionsEn: ["Who are the learners and what is their level?", "What content format is required: text, video, quizzes, or assignments?", "Do you need progress, scores, certificates, or leaderboard?", "Is there a mentor/admin who gives feedback?", "Do you need login, reminders, and content admin dashboard?"],
+    chipsId: [["Pemula", "Siswa sekolah", "Karyawan"], ["Teks", "Video", "Kuis", "Tugas"], ["Progress", "Nilai", "Sertifikat"], ["Mentor", "Admin", "Self-paced"], ["Login", "Reminder", "Admin konten"]],
+    chipsEn: [["Beginner", "Students", "Employees"], ["Text", "Video", "Quiz", "Assignment"], ["Progress", "Scores", "Certificate"], ["Mentor", "Admin", "Self-paced"], ["Login", "Reminder", "Content admin"]],
+    featuresId: [
+      feature("Dashboard Belajar", "Menampilkan kelas aktif, progress, dan target belajar.", "Data user, course, progress.", "Ringkasan belajar personal.", "Gunakan progress bar yang jelas."),
+      feature("Katalog Kelas", "User melihat daftar kelas dan memilih materi.", "Course, kategori, level.", "Daftar kelas dengan filter.", "Kartu kelas harus ringkas."),
+      feature("Detail Materi", "User membaca atau menonton materi pembelajaran.", "Lesson content.", "Halaman materi dengan status selesai.", "MVP bisa mulai dari teks dan video embed dummy."),
+      feature("Kuis dan Penilaian", "User menjawab kuis untuk mengukur pemahaman.", "Pertanyaan, pilihan jawaban.", "Skor dan feedback sederhana.", "Validasi semua jawaban wajib diisi."),
+      feature("Progress Tracking", "Sistem menyimpan progres materi dan kuis.", "lesson_id, status, score.", "Persentase progres per kelas.", "Data progress harus per user."),
+    ],
+    featuresEn: [
+      feature("Learning Dashboard", "Shows active courses, progress, and learning targets.", "User, course, progress data.", "Personal learning summary.", "Use clear progress bars."),
+      feature("Course Catalog", "Users browse classes and choose lessons.", "Course, category, level.", "Course list with filters.", "Course cards should be concise."),
+      feature("Lesson Detail", "Users read or watch learning content.", "Lesson content.", "Lesson page with completion status.", "MVP can start with text and dummy video embeds."),
+      feature("Quizzes and Scoring", "Users answer quizzes to measure understanding.", "Questions and answer choices.", "Score and simple feedback.", "Validate all answers."),
+      feature("Progress Tracking", "System saves lesson and quiz progress.", "lesson_id, status, score.", "Progress percentage per course.", "Progress must be per user."),
+    ],
+    tables: [
+      { name: "users", description: "Data siswa, mentor, dan admin.", fields: ["id int PK", "name string", "email string", "role string"] },
+      { name: "courses", description: "Daftar kelas.", fields: ["id int PK", "title string", "description text", "level string", "created_by int FK"] },
+      { name: "lessons", description: "Materi dalam kelas.", fields: ["id int PK", "course_id int FK", "title string", "content text", "order_index int"] },
+      { name: "quizzes", description: "Kuis untuk materi atau kelas.", fields: ["id int PK", "lesson_id int FK", "question text", "options json", "correct_answer string"] },
+      { name: "progress_records", description: "Progress belajar per user.", fields: ["id int PK", "user_id int FK", "course_id int FK", "lesson_id int FK", "status string", "score decimal"] },
+    ],
+    flowId: ["User login atau masuk demo.", "User memilih kelas dari katalog.", "User membuka materi dan menandai selesai.", "User mengerjakan kuis.", "Dashboard memperbarui progress dan skor.", "Admin mengelola materi dan melihat laporan progress."],
+    flowEn: ["User logs in or enters demo mode.", "User chooses a course from catalog.", "User opens lesson and marks it complete.", "User takes quiz.", "Dashboard updates progress and score.", "Admin manages content and reviews progress reports."],
+    apiActions: ["createCourse(data)", "createLesson(data)", "submitQuiz(data)", "updateProgress(data)", "getLearningDashboard(userId)", "exportProgress(filters)"],
+    designToneId: "Tampilan belajar yang fokus, bersih, dan membuat progress mudah terlihat.",
+    designToneEn: "A focused, clean learning interface that makes progress easy to see.",
+  },
+  "crm-sales": {
+    labelId: "CRM Penjualan",
+    labelEn: "Sales CRM",
+    projectNameId: "Website CRM Penjualan",
+    projectNameEn: "Sales CRM Website",
+    usersId: ["Founder", "Sales", "Manajer penjualan"],
+    usersEn: ["Founder", "Sales reps", "Sales manager"],
+    rolesId: ["Owner", "Sales", "Manager"],
+    rolesEn: ["Owner", "Sales", "Manager"],
+    inputsId: ["Lead", "customer", "deal", "pipeline", "follow-up"],
+    inputsEn: ["Leads", "customers", "deals", "pipeline", "follow-ups"],
+    storedDataId: ["users", "leads", "customers", "deals", "activities", "follow_ups"],
+    storedDataEn: ["users", "leads", "customers", "deals", "activities", "follow_ups"],
+    notificationsId: "Reminder follow-up, deal overdue, dan aktivitas sales yang belum lengkap.",
+    notificationsEn: "Follow-up reminders, overdue deals, and incomplete sales activity alerts.",
+    pages: ["Dashboard Sales", "Leads", "Customers", "Pipeline", "Activities", "Reports"],
+    questionsId: ["CRM ini untuk solo sales, founder, atau tim sales?", "Tahapan pipeline apa saja yang dibutuhkan?", "Data lead apa yang wajib disimpan?", "Apakah perlu reminder follow-up dan activity log?", "Laporan sales apa yang paling penting?"],
+    questionsEn: ["Is this CRM for solo sales, founder, or sales team?", "Which pipeline stages are needed?", "What lead data must be stored?", "Do you need follow-up reminders and activity logs?", "Which sales reports matter most?"],
+    chipsId: [["Solo sales", "Founder", "Tim sales"], ["New", "Qualified", "Proposal", "Won/Lost"], ["Kontak", "Company", "Source", "Value"], ["Reminder", "Activity log"], ["Conversion", "Forecast", "Source report"]],
+    chipsEn: [["Solo sales", "Founder", "Sales team"], ["New", "Qualified", "Proposal", "Won/Lost"], ["Contact", "Company", "Source", "Value"], ["Reminder", "Activity log"], ["Conversion", "Forecast", "Source report"]],
+    featuresId: [
+      feature("Dashboard Sales", "Menampilkan lead baru, deal aktif, follow-up hari ini, dan nilai pipeline.", "Lead, deal, activity.", "Ringkasan performa sales.", "Tampilkan prioritas follow-up."),
+      feature("Manajemen Lead", "User menambah dan mengelola lead dari berbagai sumber.", "Nama, kontak, source, status.", "Lead tersimpan dan bisa diproses.", "Validasi email/phone."),
+      feature("Pipeline Deal", "Deal dipindahkan antar tahap pipeline.", "Deal, stage, value, expected close.", "Visual pipeline dan status deal.", "MVP bisa pakai board sederhana."),
+      feature("Follow-up Reminder", "User membuat jadwal follow-up untuk lead/deal.", "Tanggal, catatan, owner.", "Reminder visual di dashboard.", "Email reminder fase berikutnya."),
+      feature("Activity Log", "Semua interaksi sales dicatat.", "Call, meeting, email, note.", "Riwayat aktivitas per lead/deal.", "Riwayat tidak boleh hilang saat status berubah."),
+    ],
+    featuresEn: [
+      feature("Sales Dashboard", "Shows new leads, active deals, today's follow-ups, and pipeline value.", "Lead, deal, activity.", "Sales performance summary.", "Show follow-up priorities."),
+      feature("Lead Management", "Users add and manage leads from multiple sources.", "Name, contact, source, status.", "Saved leads ready for processing.", "Validate email/phone."),
+      feature("Deal Pipeline", "Deals move across pipeline stages.", "Deal, stage, value, expected close.", "Visual pipeline and deal status.", "MVP can use a simple board."),
+      feature("Follow-up Reminder", "Users schedule follow-ups for leads/deals.", "Date, notes, owner.", "Visual reminder on dashboard.", "Email reminder can be later."),
+      feature("Activity Log", "All sales interactions are recorded.", "Call, meeting, email, note.", "Activity history per lead/deal.", "History must persist across status changes."),
+    ],
+    tables: [
+      { name: "users", description: "Data sales dan manager.", fields: ["id int PK", "name string", "email string", "role string"] },
+      { name: "leads", description: "Prospek penjualan.", fields: ["id int PK", "owner_id int FK", "name string", "email string", "phone string", "source string", "status string"] },
+      { name: "customers", description: "Lead yang sudah menjadi customer.", fields: ["id int PK", "lead_id int FK", "name string", "company string", "created_at datetime"] },
+      { name: "deals", description: "Peluang penjualan dan pipeline.", fields: ["id int PK", "lead_id int FK", "owner_id int FK", "stage string", "value decimal", "expected_close date"] },
+      { name: "activities", description: "Riwayat interaksi sales.", fields: ["id int PK", "lead_id int FK", "user_id int FK", "type string", "notes text", "created_at datetime"] },
+      { name: "follow_ups", description: "Jadwal follow-up.", fields: ["id int PK", "deal_id int FK", "user_id int FK", "due_at datetime", "status string"] },
+    ],
+    flowId: ["User login sebagai sales atau manager.", "User menambah lead baru.", "Lead dibuat menjadi deal dan masuk pipeline.", "User mencatat aktivitas dan jadwal follow-up.", "Dashboard menampilkan prioritas dan nilai pipeline.", "Manager export laporan performa."],
+    flowEn: ["User logs in as sales or manager.", "User adds a new lead.", "Lead becomes deal and enters pipeline.", "User records activity and follow-up schedule.", "Dashboard shows priorities and pipeline value.", "Manager exports performance report."],
+    apiActions: ["createLead(data)", "updateLead(id, data)", "createDeal(data)", "moveDealStage(id, stage)", "createActivity(data)", "exportSalesReport(filters)"],
+    designToneId: "Dashboard CRM yang profesional, padat, dan membantu sales melihat prioritas cepat.",
+    designToneEn: "A professional, dense CRM dashboard that helps sales teams see priorities quickly.",
+  },
+  "task-management": {
+    labelId: "Manajemen Tugas",
+    labelEn: "Task Management",
+    projectNameId: "Website Manajemen Tugas",
+    projectNameEn: "Task Management Website",
+    usersId: ["User pribadi", "Tim kecil", "Project manager"],
+    usersEn: ["Personal users", "Small teams", "Project managers"],
+    rolesId: ["Owner", "Member", "Viewer"],
+    rolesEn: ["Owner", "Member", "Viewer"],
+    inputsId: ["Project", "task", "assignee", "deadline", "priority", "status"],
+    inputsEn: ["Projects", "tasks", "assignees", "deadlines", "priorities", "statuses"],
+    storedDataId: ["users", "projects", "tasks", "comments", "activity_logs"],
+    storedDataEn: ["users", "projects", "tasks", "comments", "activity_logs"],
+    notificationsId: "Reminder deadline, tugas overdue, dan perubahan status.",
+    notificationsEn: "Deadline reminders, overdue tasks, and status-change alerts.",
+    pages: ["Dashboard Tugas", "Projects", "Kanban", "Task Detail", "Calendar", "Reports"],
+    questionsId: ["Aplikasi tugas ini untuk pribadi, tim kecil, atau banyak project?", "Status workflow apa saja yang dibutuhkan?", "Apakah perlu assignee, deadline, priority, tag, atau subtask?", "View apa yang wajib: Kanban, list, calendar, atau dashboard?", "Apakah perlu login, notifikasi deadline, laporan, dan admin workspace?"],
+    questionsEn: ["Is this task app for personal use, small teams, or multiple projects?", "Which workflow statuses are needed?", "Do you need assignees, deadlines, priorities, tags, or subtasks?", "Which views are required: Kanban, list, calendar, or dashboard?", "Do you need login, deadline notifications, reports, and workspace admin?"],
+    chipsId: [["Pribadi", "Tim kecil", "Multi project"], ["Todo", "Doing", "Review", "Done"], ["Assignee", "Deadline", "Priority", "Subtask"], ["Kanban", "List", "Calendar"], ["Login", "Notifikasi", "Laporan"]],
+    chipsEn: [["Personal", "Small team", "Multi project"], ["Todo", "Doing", "Review", "Done"], ["Assignee", "Deadline", "Priority", "Subtask"], ["Kanban", "List", "Calendar"], ["Login", "Notifications", "Reports"]],
+    featuresId: [
+      feature("Dashboard Tugas", "Menampilkan tugas hari ini, overdue, progress project, dan prioritas.", "Project dan task.", "Ringkasan pekerjaan.", "Buat mudah dipindai."),
+      feature("Manajemen Project", "User membuat project dan mengatur anggota.", "Nama project, deskripsi, anggota.", "Project tersimpan.", "MVP bisa satu workspace."),
+      feature("Kanban Board", "Task dipindah antar status.", "Task, status, assignee.", "Board interaktif sederhana.", "Pastikan status konsisten."),
+      feature("Task Detail", "User mengisi detail task, deadline, priority, dan komentar.", "Judul, deskripsi, due date, priority.", "Detail task lengkap.", "Validasi judul wajib."),
+      feature("Laporan Progress", "User melihat tugas selesai, overdue, dan workload.", "Periode, project, assignee.", "Laporan progress.", "Export CSV bila relevan."),
+    ],
+    featuresEn: [
+      feature("Task Dashboard", "Shows today's tasks, overdue items, project progress, and priorities.", "Project and task data.", "Work summary.", "Make it scannable."),
+      feature("Project Management", "Users create projects and manage members.", "Project name, description, members.", "Saved project.", "MVP can use one workspace."),
+      feature("Kanban Board", "Tasks move across statuses.", "Task, status, assignee.", "Simple interactive board.", "Keep statuses consistent."),
+      feature("Task Detail", "Users fill task details, deadline, priority, and comments.", "Title, description, due date, priority.", "Complete task detail.", "Validate title."),
+      feature("Progress Reports", "Users review completed, overdue, and workload data.", "Period, project, assignee.", "Progress report.", "CSV export if relevant."),
+    ],
+    tables: [
+      { name: "users", description: "Data member workspace.", fields: ["id int PK", "name string", "email string", "role string"] },
+      { name: "projects", description: "Project atau ruang kerja.", fields: ["id int PK", "owner_id int FK", "name string", "description text", "status string"] },
+      { name: "tasks", description: "Tugas yang dikelola.", fields: ["id int PK", "project_id int FK", "assignee_id int FK", "title string", "description text", "status string", "priority string", "due_date date"] },
+      { name: "comments", description: "Komentar pada task.", fields: ["id int PK", "task_id int FK", "user_id int FK", "body text", "created_at datetime"] },
+      { name: "activity_logs", description: "Riwayat perubahan task.", fields: ["id int PK", "task_id int FK", "user_id int FK", "action string", "created_at datetime"] },
+    ],
+    flowId: ["User login atau masuk demo.", "User membuat project.", "User menambah task dan assignee.", "Task dipindah antar status.", "Dashboard memperbarui progress dan overdue.", "User melihat laporan atau export."],
+    flowEn: ["User logs in or enters demo mode.", "User creates project.", "User adds task and assignee.", "Task moves across statuses.", "Dashboard updates progress and overdue items.", "User reviews report or exports."],
+    apiActions: ["createProject(data)", "createTask(data)", "updateTask(id, data)", "moveTaskStatus(id, status)", "createComment(data)", "exportTaskReport(filters)"],
+    designToneId: "Tampilan produktivitas yang rapi, cepat, dan mengutamakan status serta prioritas.",
+    designToneEn: "A tidy, fast productivity interface focused on status and priority.",
+  },
+  "content-management": {
+    labelId: "Manajemen Konten",
+    labelEn: "Content Management",
+    projectNameId: "Website Manajemen Konten",
+    projectNameEn: "Content Management Website",
+    usersId: ["Penulis", "Editor", "Admin konten"],
+    usersEn: ["Writers", "Editors", "Content admins"],
+    rolesId: ["Writer", "Editor", "Admin"],
+    rolesEn: ["Writer", "Editor", "Admin"],
+    inputsId: ["Artikel", "kategori", "tag", "SEO", "status publikasi"],
+    inputsEn: ["Articles", "categories", "tags", "SEO", "publishing status"],
+    storedDataId: ["users", "posts", "categories", "tags", "revisions"],
+    storedDataEn: ["users", "posts", "categories", "tags", "revisions"],
+    notificationsId: "Notifikasi konten siap review, jadwal publish, dan revisi.",
+    notificationsEn: "Review-ready, scheduled publishing, and revision notifications.",
+    pages: ["Dashboard Konten", "Daftar Konten", "Editor", "Kategori", "Review", "Publikasi"],
+    questionsId: ["Konten apa yang akan dikelola: blog, artikel, landing page, docs, atau social content?", "Workflow editorial apa yang dibutuhkan?", "Apakah ada penulis dan editor berbeda?", "Apakah perlu kategori, tag, SEO field, dan revision history?", "Apakah konten dipublish dari aplikasi atau hanya dikelola internal?"],
+    questionsEn: ["What content will be managed: blog, articles, landing pages, docs, or social content?", "Which editorial workflow is needed?", "Are writer and editor separate roles?", "Do you need categories, tags, SEO fields, and revision history?", "Will content be published from the app or managed internally only?"],
+    chipsId: [["Blog", "Artikel", "Landing page", "Docs"], ["Draft", "Review", "Scheduled", "Published"], ["Writer", "Editor", "Admin"], ["SEO", "Tag", "Revision"], ["Publish", "Internal only", "Export"]],
+    chipsEn: [["Blog", "Articles", "Landing page", "Docs"], ["Draft", "Review", "Scheduled", "Published"], ["Writer", "Editor", "Admin"], ["SEO", "Tags", "Revision"], ["Publish", "Internal only", "Export"]],
+    featuresId: [
+      feature("Dashboard Konten", "Menampilkan konten draft, review, scheduled, dan published.", "Posts dan status.", "Ringkasan editorial.", "Status harus mudah dipahami."),
+      feature("Editor Konten", "User menulis dan mengedit konten.", "Judul, body, excerpt, SEO.", "Konten tersimpan sebagai draft.", "Autosave bisa fase berikutnya."),
+      feature("Workflow Review", "Konten berpindah dari draft ke review hingga publish.", "Status, reviewer, catatan.", "Proses editorial terlacak.", "Role writer/editor harus jelas."),
+      feature("Kategori dan Tag", "Konten dikelompokkan untuk pencarian.", "Kategori dan tag.", "Filter konten.", "Cegah kategori duplikat."),
+      feature("Revision History", "Sistem menyimpan revisi penting.", "Post version dan editor.", "Riwayat perubahan.", "MVP cukup menyimpan snapshot sederhana."),
+    ],
+    featuresEn: [
+      feature("Content Dashboard", "Shows draft, review, scheduled, and published content.", "Posts and statuses.", "Editorial summary.", "Statuses must be clear."),
+      feature("Content Editor", "Users write and edit content.", "Title, body, excerpt, SEO.", "Content saved as draft.", "Autosave can be later."),
+      feature("Review Workflow", "Content moves from draft to review to publish.", "Status, reviewer, notes.", "Tracked editorial process.", "Writer/editor roles must be clear."),
+      feature("Categories and Tags", "Content is grouped for search.", "Categories and tags.", "Content filters.", "Prevent duplicate categories."),
+      feature("Revision History", "System stores important revisions.", "Post version and editor.", "Change history.", "MVP can store simple snapshots."),
+    ],
+    tables: [
+      { name: "users", description: "Data penulis, editor, dan admin.", fields: ["id int PK", "name string", "email string", "role string"] },
+      { name: "posts", description: "Konten utama.", fields: ["id int PK", "author_id int FK", "title string", "slug string", "body text", "status string", "published_at datetime"] },
+      { name: "categories", description: "Kategori konten.", fields: ["id int PK", "name string", "slug string"] },
+      { name: "tags", description: "Tag konten.", fields: ["id int PK", "name string", "slug string"] },
+      { name: "revisions", description: "Riwayat revisi konten.", fields: ["id int PK", "post_id int FK", "user_id int FK", "snapshot json", "created_at datetime"] },
+    ],
+    flowId: ["User login sesuai role.", "Writer membuat draft konten.", "Editor memberi review dan catatan.", "Konten dijadwalkan atau dipublish.", "Dashboard memperbarui status editorial.", "Admin export atau audit revisi."],
+    flowEn: ["User logs in by role.", "Writer creates content draft.", "Editor reviews and adds notes.", "Content is scheduled or published.", "Dashboard updates editorial status.", "Admin exports or audits revisions."],
+    apiActions: ["createPost(data)", "updatePost(id, data)", "changePostStatus(id, status)", "createCategory(data)", "createRevision(data)", "exportContent(filters)"],
+    designToneId: "Tampilan editorial yang bersih, fokus pada tulisan, status, dan antrian review.",
+    designToneEn: "A clean editorial interface focused on writing, statuses, and review queue.",
+  },
+  "e-commerce": {
+    labelId: "Toko Online",
+    labelEn: "E-commerce",
+    projectNameId: "Website Toko Online",
+    projectNameEn: "E-commerce Website",
+    usersId: ["Customer", "Admin toko", "Owner"],
+    usersEn: ["Customers", "Store admin", "Owner"],
+    rolesId: ["Customer", "Admin", "Owner"],
+    rolesEn: ["Customer", "Admin", "Owner"],
+    inputsId: ["Produk", "kategori", "cart", "order", "payment", "shipping"],
+    inputsEn: ["Products", "categories", "cart", "orders", "payment", "shipping"],
+    storedDataId: ["users", "products", "orders", "order_items", "payments"],
+    storedDataEn: ["users", "products", "orders", "order_items", "payments"],
+    notificationsId: "Status order, stok menipis, dan pembayaran perlu dicek.",
+    notificationsEn: "Order status, low stock, and payment-review alerts.",
+    pages: ["Storefront", "Product Detail", "Cart", "Checkout", "Order Status", "Admin Produk", "Laporan Sales"],
+    questionsId: ["Produk yang dijual fisik, digital, jasa, atau campuran?", "Apakah pembayaran online wajib sekarang atau cukup order manual dulu?", "Apakah produk punya varian ukuran, warna, paket, atau stok berbeda?", "Status order apa saja yang dibutuhkan?", "Apakah admin perlu kelola katalog, stok, promo, dan laporan sales?"],
+    questionsEn: ["Are products physical, digital, services, or mixed?", "Is online payment required now or are manual orders enough first?", "Do products have variants such as size, color, package, or separate stock?", "Which order statuses are needed?", "Does admin need catalog, stock, promo, and sales reports?"],
+    chipsId: [["Fisik", "Digital", "Jasa", "Campuran"], ["Order manual", "Payment gateway nanti"], ["Ukuran", "Warna", "Paket", "Variant stock"], ["Pending", "Paid", "Shipped", "Completed"], ["Katalog", "Stok", "Promo", "Laporan"]],
+    chipsEn: [["Physical", "Digital", "Service", "Mixed"], ["Manual order", "Payment gateway later"], ["Size", "Color", "Package", "Variant stock"], ["Pending", "Paid", "Shipped", "Completed"], ["Catalog", "Stock", "Promo", "Reports"]],
+    featuresId: [
+      feature("Storefront Produk", "Customer melihat produk, kategori, harga, dan status stok.", "Produk, kategori, harga.", "Daftar produk.", "Kartu produk harus informatif."),
+      feature("Detail Produk", "Menampilkan foto, deskripsi, varian, dan CTA beli.", "Product detail.", "Halaman detail produk.", "Foto bisa placeholder lokal."),
+      feature("Cart dan Checkout", "Customer memilih produk lalu membuat order.", "Cart items, alamat, kontak.", "Order baru.", "MVP bisa tanpa payment gateway."),
+      feature("Status Pesanan", "Customer melihat status order.", "Order code atau login.", "Status order jelas.", "Status harus mudah dipahami."),
+      feature("Dashboard Admin", "Admin mengelola produk, order, stok, dan laporan.", "Produk dan order.", "Ringkasan penjualan.", "Sediakan aksi ubah status."),
+    ],
+    featuresEn: [
+      feature("Product Storefront", "Customers view products, categories, prices, and stock status.", "Products, categories, prices.", "Product listing.", "Product cards must be informative."),
+      feature("Product Detail", "Shows photos, description, variants, and buy CTA.", "Product detail.", "Product detail page.", "Photos can be local placeholders."),
+      feature("Cart and Checkout", "Customers choose products and create orders.", "Cart items, address, contact.", "New order.", "MVP can skip payment gateway."),
+      feature("Order Status", "Customers review order status.", "Order code or login.", "Clear order status.", "Statuses must be easy to understand."),
+      feature("Admin Dashboard", "Admin manages products, orders, stock, and reports.", "Products and orders.", "Sales summary.", "Provide status change actions."),
+    ],
+    tables: [
+      { name: "users", description: "Customer dan admin.", fields: ["id int PK", "name string", "email string", "phone string", "role string"] },
+      { name: "products", description: "Produk yang dijual.", fields: ["id int PK", "name string", "slug string", "description text", "price decimal", "stock int", "status string"] },
+      { name: "orders", description: "Pesanan customer.", fields: ["id int PK", "user_id int FK", "status string", "total decimal", "shipping_address text", "created_at datetime"] },
+      { name: "order_items", description: "Item di dalam order.", fields: ["id int PK", "order_id int FK", "product_id int FK", "quantity int", "unit_price decimal"] },
+      { name: "payments", description: "Catatan pembayaran manual atau gateway.", fields: ["id int PK", "order_id int FK", "amount decimal", "method string", "status string"] },
+    ],
+    flowId: ["Customer membuka storefront.", "Customer melihat detail dan menambah produk ke cart.", "Customer checkout dan membuat order.", "Admin melihat order dan mengubah status.", "Customer memantau status pesanan.", "Owner melihat laporan sales."],
+    flowEn: ["Customer opens storefront.", "Customer reviews detail and adds product to cart.", "Customer checks out and creates order.", "Admin reviews order and updates status.", "Customer tracks order status.", "Owner reviews sales report."],
+    apiActions: ["createProduct(data)", "updateProduct(id, data)", "createOrder(data)", "updateOrderStatus(id, status)", "getStorefrontProducts(filters)", "exportSalesReport(filters)"],
+    designToneId: "Tampilan toko yang jelas, informatif, dan memudahkan pembelian tanpa proses rumit.",
+    designToneEn: "A clear, informative store interface that makes buying easy.",
+  },
+  "saas-dashboard": {
+    labelId: "Dashboard SaaS/Internal",
+    labelEn: "SaaS/Internal Dashboard",
+    projectNameId: "Dashboard Operasional",
+    projectNameEn: "Operational Dashboard",
+    usersId: ["Owner", "Admin", "Tim internal"],
+    usersEn: ["Owner", "Admin", "Internal team"],
+    rolesId: ["Owner", "Admin", "Member", "Viewer"],
+    rolesEn: ["Owner", "Admin", "Member", "Viewer"],
+    inputsId: ["Metric", "workspace", "report", "target", "alert"],
+    inputsEn: ["Metrics", "workspaces", "reports", "targets", "alerts"],
+    storedDataId: ["users", "workspaces", "metrics", "reports", "alerts"],
+    storedDataEn: ["users", "workspaces", "metrics", "reports", "alerts"],
+    notificationsId: "Alert target terlewati, anomaly, dan laporan berkala.",
+    notificationsEn: "Target, anomaly, and periodic report alerts.",
+    pages: ["Dashboard", "Metrics", "Reports", "Targets", "Alerts", "Settings"],
+    questionsId: ["Metric apa yang harus dipantau dashboard ini?", "Apakah untuk internal saja, satu workspace, atau multi-tenant?", "Role pengguna apa saja yang diperlukan?", "Data metric dimasukkan manual, import CSV, atau integrasi API nanti?", "Alert dan laporan apa yang paling penting?"],
+    questionsEn: ["Which metrics should this dashboard monitor?", "Is it internal only, single workspace, or multi-tenant?", "Which user roles are needed?", "Are metrics entered manually, imported by CSV, or integrated by API later?", "Which alerts and reports are most important?"],
+    chipsId: [["Revenue", "User", "Operasional", "Support"], ["Internal", "Single workspace", "Multi-tenant"], ["Owner", "Admin", "Member", "Viewer"], ["Manual", "CSV", "API nanti"], ["Weekly report", "Anomaly", "Target"]],
+    chipsEn: [["Revenue", "Users", "Operations", "Support"], ["Internal", "Single workspace", "Multi-tenant"], ["Owner", "Admin", "Member", "Viewer"], ["Manual", "CSV", "API later"], ["Weekly report", "Anomaly", "Target"]],
+    featuresId: [
+      feature("Overview Dashboard", "Menampilkan KPI utama, tren, dan status target.", "Metric dan target.", "Ringkasan operasional.", "Angka harus mudah dibandingkan."),
+      feature("Manajemen Metric", "User menambah dan mengedit metric yang dipantau.", "Nama metric, value, periode.", "Metric tersimpan.", "Sediakan validasi angka."),
+      feature("Target Tracking", "User membuat target dan membandingkan realisasi.", "Target, periode, owner.", "Progress target.", "Gunakan indikator status."),
+      feature("Reports", "User melihat laporan berkala dan filter data.", "Periode, metric, workspace.", "Tabel dan grafik laporan.", "Export jika relevan."),
+      feature("Alerts", "Sistem menampilkan alert saat kondisi penting terjadi.", "Threshold dan metric.", "Alert dashboard.", "MVP cukup alert visual."),
+    ],
+    featuresEn: [
+      feature("Overview Dashboard", "Shows key KPIs, trends, and target status.", "Metrics and targets.", "Operational summary.", "Numbers must be easy to compare."),
+      feature("Metric Management", "Users create and edit tracked metrics.", "Metric name, value, period.", "Saved metric.", "Validate numbers."),
+      feature("Target Tracking", "Users create targets and compare actual results.", "Target, period, owner.", "Target progress.", "Use status indicators."),
+      feature("Reports", "Users view periodic reports and filter data.", "Period, metric, workspace.", "Report table and charts.", "Export if relevant."),
+      feature("Alerts", "System shows alerts when important conditions happen.", "Threshold and metric.", "Dashboard alert.", "Visual alerts are enough for MVP."),
+    ],
+    tables: [
+      { name: "users", description: "Data pengguna dashboard.", fields: ["id int PK", "name string", "email string", "role string"] },
+      { name: "workspaces", description: "Workspace atau organisasi.", fields: ["id int PK", "owner_id int FK", "name string", "plan string"] },
+      { name: "metrics", description: "Nilai metric yang dipantau.", fields: ["id int PK", "workspace_id int FK", "name string", "value decimal", "period string", "recorded_at datetime"] },
+      { name: "reports", description: "Laporan tersimpan.", fields: ["id int PK", "workspace_id int FK", "title string", "period string", "summary text"] },
+      { name: "alerts", description: "Alert berdasarkan target atau threshold.", fields: ["id int PK", "workspace_id int FK", "metric_id int FK", "type string", "message text", "status string"] },
+    ],
+    flowId: ["User login ke workspace.", "User melihat KPI di dashboard.", "User menambah metric atau import data.", "Sistem membandingkan metric dengan target.", "Dashboard menampilkan alert dan tren.", "User export laporan berkala."],
+    flowEn: ["User logs into workspace.", "User views KPIs on dashboard.", "User adds metric or imports data.", "System compares metrics with targets.", "Dashboard shows alerts and trends.", "User exports periodic reports."],
+    apiActions: ["createMetric(data)", "updateMetric(id, data)", "createTarget(data)", "getDashboardSummary(filters)", "createAlertRule(data)", "exportReport(filters)"],
+    designToneId: "Dashboard SaaS yang utilitarian, padat, dan optimal untuk scanning KPI.",
+    designToneEn: "A utilitarian SaaS dashboard optimized for KPI scanning.",
+  },
+  "generic-web-app": {
+    labelId: "Website Aplikasi Custom",
+    labelEn: "Custom Web Application",
+    projectNameId: "Website Aplikasi Custom",
+    projectNameEn: "Custom Web Application",
+    usersId: ["User utama sesuai ide", "Admin", "Owner"],
+    usersEn: ["Primary users based on idea", "Admin", "Owner"],
+    rolesId: ["User", "Admin", "Owner"],
+    rolesEn: ["User", "Admin", "Owner"],
+    inputsId: ["Data utama", "status", "catatan", "kategori", "laporan"],
+    inputsEn: ["Core data", "status", "notes", "categories", "reports"],
+    storedDataId: ["users", "items", "categories", "activity_logs", "settings"],
+    storedDataEn: ["users", "items", "categories", "activity_logs", "settings"],
+    notificationsId: "Alert visual untuk data penting, status berubah, atau item yang perlu ditindaklanjuti.",
+    notificationsEn: "Visual alerts for important data, status changes, or items needing follow-up.",
+    pages: ["Dashboard", "Data Utama", "Tambah Data", "Detail Data", "Laporan", "Admin"],
+    questionsId: discoveryQuestionsId,
+    questionsEn: discoveryQuestionsEn,
+    chipsId: discoveryChipsId,
+    chipsEn: discoveryChipsEn,
+    featuresId: [
+      feature("Dashboard Utama", "Menampilkan ringkasan data, status penting, dan aktivitas terbaru.", "Data utama, status, filter.", "Ringkasan yang mudah dipahami.", "Sesuaikan kartu metric dengan domain ide user."),
+      feature("Manajemen Data Utama", "User dapat menambah, mengedit, menghapus, mencari, dan memfilter data utama.", "Field utama sesuai kebutuhan user.", "Data tersimpan dan dapat dikelola.", "Jangan gunakan field generic jika domain sudah jelas."),
+      feature("Detail dan Riwayat", "User melihat detail data dan riwayat perubahan.", "ID data, activity log.", "Halaman detail lengkap.", "Riwayat membantu audit dan kepercayaan user."),
+      feature("Laporan dan Export", "User melihat laporan sederhana dan mengekspor data sesuai filter.", "Periode, status, kategori.", "Tabel laporan dan CSV.", "Export relevan jika user butuh arsip."),
+      feature("Admin Panel", "Admin mengatur data referensi, role, dan konfigurasi dasar.", "User, kategori, settings.", "Panel kontrol admin.", "Role admin harus dibedakan dari user biasa."),
+    ],
+    featuresEn: [
+      feature("Main Dashboard", "Shows data summary, important statuses, and recent activity.", "Core data, status, filters.", "Easy-to-understand summary.", "Adapt metric cards to the user's domain."),
+      feature("Core Data Management", "Users can create, edit, delete, search, and filter core data.", "Core fields based on user needs.", "Saved and manageable data.", "Avoid generic fields if the domain is clear."),
+      feature("Detail and History", "Users see data detail and change history.", "Data ID, activity log.", "Complete detail page.", "History supports audit and trust."),
+      feature("Reports and Export", "Users review simple reports and export filtered data.", "Period, status, category.", "Report table and CSV.", "Export is relevant when users need records."),
+      feature("Admin Panel", "Admin manages reference data, roles, and basic configuration.", "Users, categories, settings.", "Admin control panel.", "Admin role must be separate from normal users."),
+    ],
+    tables: [
+      { name: "users", description: "Data pengguna dan role.", fields: ["id int PK", "name string", "email string", "role string", "created_at datetime"] },
+      { name: "items", description: "Data utama aplikasi sesuai ide user.", fields: ["id int PK", "user_id int FK", "title string", "category_id int FK", "status string", "notes text", "created_at datetime"] },
+      { name: "categories", description: "Kategori data utama.", fields: ["id int PK", "name string", "description text"] },
+      { name: "activity_logs", description: "Riwayat perubahan dan aktivitas.", fields: ["id int PK", "item_id int FK", "user_id int FK", "action string", "created_at datetime"] },
+      { name: "settings", description: "Konfigurasi aplikasi.", fields: ["id int PK", "key string", "value text", "updated_at datetime"] },
+    ],
+    flowId: ["User login atau masuk demo.", "User melakukan setup awal data referensi.", "User menambah data utama.", "Dashboard memperbarui ringkasan dan status.", "User membuka detail dan riwayat.", "User export laporan jika relevan."],
+    flowEn: ["User logs in or enters demo mode.", "User sets initial reference data.", "User creates core data.", "Dashboard updates summary and status.", "User opens detail and history.", "User exports report if relevant."],
+    apiActions: ["createItem(data)", "updateItem(id, data)", "deleteItem(id)", "getDashboardSummary(filters)", "createActivityLog(data)", "exportItems(filters)"],
+    designToneId: "Tampilan aplikasi kerja yang sederhana, jelas, dan membantu pemula memahami aksi berikutnya.",
+    designToneEn: "A simple work-app interface that helps beginners understand the next action.",
+  },
+};
 
 export function detectProjectDomain(idea: string): ProjectDomain {
   const lower = idea.toLowerCase();
@@ -289,39 +664,27 @@ export function detectProjectDomain(idea: string): ProjectDomain {
   if (includesAny(lower, ["finance", "financial", "keuangan", "pengeluaran", "pemasukan", "saldo", "transaksi", "tagihan", "budget"])) {
     return "finance-tracker";
   }
-
   if (includesAny(lower, ["inventory", "stok", "stock", "gudang", "warehouse", "barang", "sku", "rak", "batch"])) {
     return "inventory";
   }
-
-  if (includesAny(lower, ["booking", "reservasi", "jadwal", "appointment", "slot", "janji temu"])) {
+  if (includesAny(lower, ["booking", "reservasi", "jadwal", "appointment", "slot", "janji temu", "laundry", "cuci"])) {
     return "booking-system";
   }
-
   if (includesAny(lower, ["learning", "belajar", "kursus", "kelas", "siswa", "quiz", "kuis", "lesson", "edtech"])) {
     return "learning-app";
   }
-
   if (includesAny(lower, ["crm", "sales", "lead", "pipeline", "prospect", "customer relationship", "penjualan"])) {
     return "crm-sales";
   }
-
   if (includesAny(lower, ["task", "todo", "kanban", "project management", "tugas", "deadline", "sprint"])) {
     return "task-management";
   }
-
   if (includesAny(lower, ["content", "cms", "blog", "artikel", "editorial", "publishing", "postingan"])) {
     return "content-management";
   }
-
   if (includesAny(lower, ["ecommerce", "e-commerce", "toko online", "checkout", "cart", "keranjang", "produk", "order"])) {
     return "e-commerce";
   }
-
-  if (includesAny(lower, ["ai agent", "agent ai", "agen ai", "assistant", "asisten ai", "automation agent", "copilot"])) {
-    return "ai-agent";
-  }
-
   if (includesAny(lower, ["saas", "dashboard", "analytics", "metric", "subscription", "tenant", "admin panel"])) {
     return "saas-dashboard";
   }
@@ -329,1141 +692,358 @@ export function detectProjectDomain(idea: string): ProjectDomain {
   return "generic-web-app";
 }
 
-function createFeature(name: string, description: string, input: string, output: string, notes: string): CoreFeature {
-  return { name, description, input, output, notes };
-}
-
-function getDomainProfile(domain: ProjectDomain, idea: string): DomainProfile {
-  const profiles: Record<ProjectDomain, DomainProfile> = {
-    "finance-tracker": {
-      domain,
-      label: "Finance Tracker",
-      projectName: "Daily Finance Tracker",
-      primaryEntity: "transactions",
-      primaryEntityLabel: "transaksi",
-      activityEntity: "activity_logs",
-      settingsEntity: "budget_settings",
-      targetUsers: ["Individu yang mengelola uang harian", "Keluarga", "Freelancer", "Pemilik bisnis kecil"],
-      roles: ["Demo user", "Registered user", "Household admin", "Business owner"],
-      inputMethods: ["Input pemasukan/pengeluaran manual", "Kategori transaksi", "Filter bulan", "Export laporan"],
-      storedData: ["transaksi", "kategori", "budget", "tagihan", "saldo", "laporan", "riwayat aktivitas"],
-      notifications: "Alert visual untuk tagihan, budget hampir habis, transaksi besar, dan pengeluaran yang melewati batas bulanan.",
-      pages: ["Onboarding", "Dashboard Keuangan", "Tambah Transaksi", "Daftar Transaksi", "Kategori", "Budget & Tagihan", "Laporan Bulanan", "Settings"],
-      questions: [
-        "Apakah aplikasi ini untuk pribadi, keluarga, freelancer, atau bisnis kecil?",
-        "Data apa saja yang perlu dicatat: pemasukan, pengeluaran, hutang, tagihan, budget, atau saldo awal?",
-        "Apakah user perlu kategori transaksi dan budget per kategori?",
-        "Grafik atau laporan apa yang paling penting: harian, mingguan, bulanan, atau per kategori?",
-        "Apakah user perlu export laporan, reminder tagihan, atau alert budget?",
-      ],
-      chips: [
-        ["Pribadi", "Keluarga", "Freelancer", "Bisnis kecil"],
-        ["Pemasukan", "Pengeluaran", "Hutang", "Tagihan", "Saldo awal"],
-        ["Kategori wajib", "Budget per kategori", "Kategori default"],
-        ["Grafik bulanan", "Laporan kategori", "Tren saldo"],
-        ["Export CSV", "Reminder tagihan", "Low budget alert"],
-      ],
-      features: [
-        createFeature("Dashboard Keuangan", "Menampilkan saldo, pemasukan, pengeluaran, cashflow, budget tersisa, dan transaksi terbaru.", "Transaksi, kategori, periode, budget.", "Kartu metrik, grafik sederhana, insight bulanan, dan alert.", "Dashboard harus berguna dengan data dummy dan tetap mudah dibaca di mobile."),
-        createFeature("Manajemen Transaksi", "User dapat menambah, mengedit, menghapus, dan mencari transaksi pemasukan atau pengeluaran.", "Tipe, nominal, kategori, tanggal, catatan.", "Transaksi tersimpan dan dashboard diperbarui.", "Nominal harus tervalidasi dan tipe transaksi harus jelas."),
-        createFeature("Kategori dan Budget", "User dapat memakai kategori default atau membuat kategori sendiri dengan batas budget.", "Nama kategori, tipe, limit bulanan, warna label.", "Kategori muncul di form, filter, dan laporan.", "Sediakan kategori default agar onboarding cepat."),
-        createFeature("Tagihan dan Reminder", "User dapat mencatat tagihan rutin dan melihat alert jatuh tempo.", "Nama tagihan, nominal, tanggal jatuh tempo, status.", "Daftar reminder dan alert visual di dashboard.", "MVP cukup alert visual, belum perlu email/push notification."),
-        createFeature("Laporan Bulanan", "Aplikasi merangkum pengeluaran, pemasukan, saldo akhir, dan kategori terbesar.", "Rentang tanggal, kategori, tipe transaksi.", "Laporan bulanan dan grafik/tren sederhana.", "Gunakan komponen ringan tanpa chart API eksternal."),
-        createFeature("Export Laporan", "User dapat mengekspor transaksi sesuai filter.", "Periode, kategori, tipe transaksi.", "File CSV atau tampilan print-friendly.", "Export harus berjalan lokal tanpa service eksternal."),
-      ],
-      flow: ["User masuk sebagai demo user atau akun pribadi.", "User mengatur saldo awal dan kategori default.", "User menambah transaksi pemasukan/pengeluaran.", "Dashboard memperbarui saldo dan metrik bulanan.", "User memfilter transaksi berdasarkan bulan/kategori.", "User melihat laporan bulanan dan alert budget.", "User mengedit atau menghapus transaksi.", "User export laporan untuk arsip."],
-      apiActions: ["createTransaction(data)", "updateTransaction(id, data)", "deleteTransaction(id)", "getTransactions(userId, filters)", "getFinanceSummary(userId, period)", "createCategory(data)", "updateBudgetSetting(data)", "exportTransactions(userId, filters)"],
-      acceptance: ["User bisa menambah transaksi pemasukan dan pengeluaran.", "Saldo berubah otomatis berdasarkan transaksi.", "Dashboard menampilkan minimal total pemasukan, total pengeluaran, saldo, dan kategori terbesar.", "User bisa membuat atau memilih kategori transaksi.", "User bisa memfilter transaksi per bulan dan kategori.", "User bisa melihat alert budget/tagihan jika relevan.", "User bisa export laporan CSV.", "Nominal negatif atau kosong ditolak oleh validasi."],
-      designTone: "Dashboard finansial yang tenang, rapi, sangat mudah dipindai, dengan warna status untuk income, expense, budget warning, dan overdue.",
-    },
-    inventory: {
-      domain,
-      label: "Inventory / Stok Gudang",
-      projectName: "Warehouse Stock Control",
-      primaryEntity: "products",
-      primaryEntityLabel: "produk/stok",
-      activityEntity: "stock_movements",
-      settingsEntity: "warehouse_settings",
-      targetUsers: ["Admin gudang", "Pemilik toko", "Staff operasional", "Procurement"],
-      roles: ["Admin", "Warehouse staff", "Manager"],
-      inputMethods: ["Input barang", "Stok masuk", "Stok keluar", "Lokasi rak", "Scan SKU opsional"],
-      storedData: ["produk", "SKU", "batch", "stok", "lokasi rak", "supplier", "pergerakan stok", "low stock threshold"],
-      notifications: "Low stock alert, stok habis, barang mendekati reorder point, dan movement tidak wajar.",
-      pages: ["Dashboard Stok", "Daftar Produk", "Tambah Produk", "Stock In/Out", "Lokasi Rak", "Supplier", "Stock History", "Settings"],
-      questions: [
-        "Apakah inventori ini untuk toko kecil, gudang, produksi, atau distribusi?",
-        "Apakah perlu batch number, expiry date, SKU/barcode, atau serial number?",
-        "Apakah stok masuk dan stok keluar dicatat manual atau dari order?",
-        "Apakah perlu lokasi rak, gudang cabang, atau multi-location stock?",
-        "Apakah butuh low stock alert dan apakah ada admin tunggal atau banyak admin?",
-      ],
-      chips: [
-        ["Toko kecil", "Gudang", "Produksi", "Distribusi"],
-        ["Batch number", "Expiry date", "SKU", "Barcode"],
-        ["Manual", "Dari order", "Import CSV"],
-        ["Lokasi rak", "Multi gudang", "Cabang"],
-        ["Low stock alert", "Admin tunggal", "Banyak admin"],
-      ],
-      features: [
-        createFeature("Dashboard Inventory", "Menampilkan total SKU, stok rendah, stok habis, movement terbaru, dan nilai inventori.", "Data produk, movement, threshold.", "Kartu metrik dan alert stok.", "Low stock harus terlihat jelas begitu admin membuka aplikasi."),
-        createFeature("Manajemen Produk", "Admin dapat membuat, mengedit, mencari, dan menonaktifkan produk.", "Nama produk, SKU, kategori, supplier, lokasi, threshold.", "Produk tersimpan dan muncul di list inventory.", "SKU harus unik."),
-        createFeature("Stock In / Stock Out", "Staff dapat mencatat barang masuk dan keluar dengan alasan movement.", "Produk, jumlah, tipe movement, catatan, lokasi.", "Stok berubah dan movement tercatat.", "Tidak boleh stock out melebihi stok tersedia."),
-        createFeature("Batch dan Lokasi", "Aplikasi mendukung batch number dan lokasi rak bila diperlukan.", "Batch, expiry date, lokasi rak/gudang.", "Detail stok per batch atau lokasi.", "Bisa dibuat opsional agar MVP tidak terlalu berat."),
-        createFeature("Low Stock Alert", "Sistem menampilkan produk yang berada di bawah batas minimum.", "Threshold per produk.", "Alert dashboard dan filter low stock.", "Manager harus bisa melihat prioritas reorder."),
-        createFeature("Riwayat Stok", "Semua perubahan stok tersimpan sebagai audit trail.", "Movement event dan user actor.", "Timeline movement per produk.", "Penting untuk akurasi dan accountability."),
-      ],
-      flow: ["Admin login atau masuk demo.", "Admin menambahkan produk dan threshold stok.", "Staff mencatat stok masuk.", "Staff mencatat stok keluar saat barang dipakai/terjual.", "Dashboard menampilkan stok rendah dan movement terbaru.", "Admin membuka detail produk untuk melihat riwayat.", "Admin mengedit data produk atau lokasi.", "Manager export laporan stok."],
-      apiActions: ["createProduct(data)", "updateProduct(id, data)", "deleteProduct(id)", "getProducts(filters)", "createStockMovement(data)", "getStockMovements(productId)", "getInventorySummary(userId)", "exportInventoryReport(filters)"],
-      acceptance: ["User bisa menambahkan produk dengan SKU unik.", "User bisa mencatat stok masuk.", "User bisa mencatat stok keluar tanpa membuat stok negatif.", "Dashboard menampilkan produk low stock.", "User bisa melihat riwayat movement per produk.", "User bisa mencari produk berdasarkan nama/SKU/kategori.", "User bisa mencatat lokasi rak jika fitur diaktifkan.", "Validasi jumlah stok berjalan."],
-      designTone: "Dashboard operasional yang padat, cepat dipindai, dengan status stok jelas dan tabel yang nyaman untuk pekerjaan berulang.",
-    },
-    "booking-system": {
-      domain,
-      label: "Booking System",
-      projectName: "Service Booking Hub",
-      primaryEntity: "bookings",
-      primaryEntityLabel: "booking",
-      activityEntity: "booking_history",
-      settingsEntity: "service_settings",
-      targetUsers: ["Customer", "Admin layanan", "Staff operasional", "Pemilik bisnis jasa"],
-      roles: ["Customer", "Staff", "Admin"],
-      inputMethods: ["Form booking", "Kalender slot", "Status booking", "Catatan customer"],
-      storedData: ["layanan", "slot jadwal", "booking", "customer", "status", "payment note", "history"],
-      notifications: "Alert booking baru, jadwal mendekat, booking pending, dan pembatalan.",
-      pages: ["Landing", "Booking Form", "Dashboard Booking", "Calendar / Schedule", "Booking List", "Booking Detail", "Services", "Settings"],
-      questions: [
-        "Jenis layanan apa yang akan dibooking dan berapa durasi setiap layanan?",
-        "Apakah booking butuh pilihan tanggal, jam, staff tertentu, atau lokasi?",
-        "Apakah booking langsung confirmed atau perlu approval admin?",
-        "Status apa saja yang dibutuhkan: pending, confirmed, completed, cancelled, no-show?",
-        "Apakah perlu reminder, pembayaran, deposit, atau catatan customer?",
-      ],
-      chips: [
-        ["Jasa appointment", "Rental", "Kelas", "Konsultasi"],
-        ["Pilih tanggal", "Pilih jam", "Pilih staff", "Pilih lokasi"],
-        ["Auto confirmed", "Approval admin", "Waitlist"],
-        ["Pending", "Confirmed", "Completed", "Cancelled"],
-        ["Reminder", "Deposit", "Catatan customer"],
-      ],
-      features: [
-        createFeature("Booking Form", "Customer dapat memilih layanan, slot waktu, dan mengisi detail kontak.", "Layanan, tanggal, jam, customer, catatan.", "Booking baru dengan status awal.", "Form harus cepat dan mobile-friendly."),
-        createFeature("Schedule Calendar", "Admin melihat jadwal booking dalam tampilan kalender atau list harian.", "Tanggal, staff, layanan.", "Slot tersedia dan booking aktif.", "MVP boleh memakai list jadwal jika kalender kompleks."),
-        createFeature("Booking Management", "Admin dapat mengubah status, menjadwal ulang, atau membatalkan booking.", "Status baru, catatan admin, waktu baru.", "Status booking terbaru dan history.", "Status harus konsisten."),
-        createFeature("Service Management", "Admin mengelola layanan, durasi, harga, dan kapasitas.", "Nama layanan, durasi, harga, kapasitas.", "Layanan tersedia di booking form.", "Sediakan sample service."),
-        createFeature("Customer Records", "Sistem menyimpan informasi customer dan riwayat booking.", "Nama, kontak, booking history.", "Profil customer sederhana.", "Hindari menyimpan data sensitif berlebihan."),
-        createFeature("Reminder & Alerts", "Aplikasi menampilkan jadwal mendekat dan booking pending.", "Tanggal booking dan status.", "Alert dashboard.", "MVP cukup alert visual."),
-      ],
-      flow: ["Customer membuka form booking.", "Customer memilih layanan dan slot.", "Customer mengirim booking.", "Admin melihat booking baru di dashboard.", "Admin confirm/reschedule/cancel booking.", "Customer atau admin melihat detail booking.", "Staff menandai booking completed.", "Admin melihat riwayat dan laporan booking."],
-      apiActions: ["createBooking(data)", "updateBookingStatus(id, status)", "rescheduleBooking(id, data)", "deleteBooking(id)", "getBookings(filters)", "getAvailableSlots(serviceId, date)", "createService(data)", "getBookingSummary(filters)"],
-      acceptance: ["Customer bisa membuat booking.", "Admin bisa melihat booking baru.", "Admin bisa mengubah status booking.", "Slot yang sudah penuh tidak bisa dipilih.", "Dashboard menampilkan booking hari ini dan pending.", "User bisa filter booking berdasarkan tanggal/status.", "Riwayat perubahan status tersimpan.", "Form booking responsive di mobile."],
-      designTone: "UI scheduling yang jelas, ringan, dan fokus pada kalender, status, serta aksi cepat admin.",
-    },
-    "learning-app": {
-      domain,
-      label: "Learning App",
-      projectName: "Learning Progress Studio",
-      primaryEntity: "lessons",
-      primaryEntityLabel: "materi belajar",
-      activityEntity: "student_progress",
-      settingsEntity: "learning_settings",
-      targetUsers: ["Siswa", "Guru", "Mentor", "Admin lembaga belajar", "Orang tua"],
-      roles: ["Student", "Teacher", "Admin"],
-      inputMethods: ["Materi belajar", "Jawaban kuis", "Checklist progress", "Feedback mentor"],
-      storedData: ["course", "lesson", "quiz", "question", "answer", "score", "progress", "feedback"],
-      notifications: "Alert materi belum selesai, kuis baru, progress menurun, dan target belajar mendekat.",
-      pages: ["Dashboard Belajar", "Course List", "Lesson Detail", "Quiz", "Progress", "Teacher Review", "Settings"],
-      questions: [
-        "Siapa target learner: anak, siswa sekolah, mahasiswa, karyawan, atau komunitas?",
-        "Konten belajar berbentuk apa: teks, video, quiz, flashcard, atau tugas?",
-        "Apakah perlu progress tracking, scoring, sertifikat, atau leaderboard?",
-        "Apakah ada role guru/mentor yang memberi feedback?",
-        "Apa yang membuat learner mau kembali belajar setiap hari?",
-      ],
-      chips: [
-        ["Anak", "Siswa SMP/SMA", "Karyawan", "Komunitas"],
-        ["Teks", "Video", "Quiz", "Flashcard", "Tugas"],
-        ["Progress", "Scoring", "Sertifikat", "Leaderboard"],
-        ["Guru", "Mentor", "Self-paced"],
-        ["Streak", "Reminder", "Badge", "Target harian"],
-      ],
-      features: [
-        createFeature("Learning Dashboard", "Menampilkan progress, course aktif, lesson berikutnya, skor, dan streak.", "Progress, lesson status, quiz score.", "Ringkasan belajar dan rekomendasi langkah berikutnya.", "Dashboard harus memotivasi tanpa terlalu ramai."),
-        createFeature("Course & Lesson Management", "Admin/guru dapat membuat course, lesson, dan urutan materi.", "Judul, konten, level, urutan.", "Course dan lesson tersusun.", "MVP bisa memakai konten teks dulu."),
-        createFeature("Quiz Engine", "Learner mengerjakan kuis untuk mengecek pemahaman.", "Pertanyaan, pilihan jawaban, jawaban user.", "Skor dan feedback.", "Validasi lokal dulu, tanpa AI scoring."),
-        createFeature("Progress Tracking", "Sistem mencatat lesson selesai, skor, dan progress keseluruhan.", "Completion event dan score.", "Progress per learner.", "Teacher dapat membaca progress dengan cepat."),
-        createFeature("Feedback Mentor", "Guru/mentor dapat memberi komentar dan rekomendasi belajar.", "Komentar, lesson, learner.", "Feedback tersimpan.", "Opsional untuk mode self-paced."),
-        createFeature("Engagement Loop", "Aplikasi memberi motivasi seperti streak, target harian, atau badge.", "Aktivitas belajar harian.", "Streak dan badge sederhana.", "Jangan buat gamification terlalu kompleks di MVP."),
-      ],
-      flow: ["Learner masuk ke dashboard.", "Learner memilih course.", "Learner membaca lesson.", "Learner mengerjakan quiz.", "Sistem menghitung skor dan progress.", "Learner melihat rekomendasi berikutnya.", "Teacher melihat progress dan memberi feedback.", "Learner kembali untuk mengejar target/streak."],
-      apiActions: ["createCourse(data)", "createLesson(data)", "updateLesson(id, data)", "submitQuizAnswer(data)", "getStudentProgress(userId)", "markLessonComplete(lessonId)", "createFeedback(data)", "getLearningSummary(userId)"],
-      acceptance: ["User bisa membuka course dan lesson.", "User bisa menyelesaikan lesson.", "User bisa mengerjakan kuis.", "Sistem menghitung skor quiz.", "Dashboard menampilkan progress.", "Teacher/admin bisa melihat progress jika role tersedia.", "User bisa melihat lesson berikutnya.", "UI nyaman untuk membaca materi di mobile."],
-      designTone: "UI edukasi yang fokus, readable, ringan, dan memberi rasa progress yang jelas.",
-    },
-    "crm-sales": {
-      domain,
-      label: "CRM / Sales",
-      projectName: "Sales Pipeline CRM",
-      primaryEntity: "leads",
-      primaryEntityLabel: "lead/customer",
-      activityEntity: "sales_activities",
-      settingsEntity: "pipeline_settings",
-      targetUsers: ["Sales team", "Sales manager", "Founder", "Account executive"],
-      roles: ["Sales rep", "Manager", "Admin"],
-      inputMethods: ["Input lead", "Pipeline stage", "Follow-up note", "Deal value", "Contact activity"],
-      storedData: ["lead", "contact", "company", "deal", "pipeline stage", "activity", "follow-up"],
-      notifications: "Alert follow-up overdue, deal idle, lead baru, dan opportunity mendekati closing.",
-      pages: ["Sales Dashboard", "Leads", "Pipeline Board", "Lead Detail", "Activities", "Reports", "Settings"],
-      questions: [
-        "Siapa yang memakai CRM ini: founder, sales tunggal, atau tim sales?",
-        "Tahap pipeline apa saja yang dibutuhkan dari lead sampai close?",
-        "Data lead apa yang wajib disimpan: kontak, company, source, value, notes?",
-        "Apakah perlu reminder follow-up dan activity log?",
-        "Report sales apa yang paling penting: conversion, deal value, source, atau forecast?",
-      ],
-      chips: [
-        ["Founder", "Sales tunggal", "Tim sales"],
-        ["New", "Qualified", "Proposal", "Won/Lost"],
-        ["Kontak", "Company", "Source", "Deal value"],
-        ["Reminder follow-up", "Activity log", "Email note"],
-        ["Conversion", "Forecast", "Source report", "Deal value"],
-      ],
-      features: [
-        createFeature("Sales Dashboard", "Menampilkan pipeline value, leads baru, follow-up overdue, dan conversion summary.", "Lead, deal, activity, stage.", "Metrik sales dan prioritas follow-up.", "Manager harus cepat tahu deal mana yang butuh aksi."),
-        createFeature("Lead Management", "Sales dapat membuat, mengedit, mencari, dan mengelola lead.", "Nama, kontak, company, source, value, owner.", "Lead tersimpan dan masuk pipeline.", "Contact info harus divalidasi."),
-        createFeature("Pipeline Board", "Lead ditampilkan berdasarkan stage pipeline.", "Stage, owner, deal value.", "Kanban pipeline atau grouped list.", "Drag-and-drop opsional, tombol stage change cukup untuk MVP."),
-        createFeature("Activity Log", "Sales mencatat call, meeting, email, dan notes.", "Tipe aktivitas, tanggal, catatan.", "Timeline aktivitas lead.", "Penting untuk handover dan audit."),
-        createFeature("Follow-up Reminder", "Aplikasi menampilkan lead yang perlu dihubungi.", "Tanggal follow-up dan status.", "Alert follow-up overdue/upcoming.", "MVP visual alert tanpa email."),
-        createFeature("Sales Report", "Manager melihat conversion, source performance, dan deal value.", "Filter periode, owner, source.", "Report sederhana dan export.", "Report harus bisa dipakai untuk keputusan sales."),
-      ],
-      flow: ["Sales login.", "Sales menambah lead baru.", "Lead masuk stage awal pipeline.", "Sales mencatat activity dan follow-up.", "Sales mengubah stage lead.", "Dashboard memperbarui pipeline value.", "Manager melihat report dan follow-up overdue.", "Sales menutup deal sebagai won/lost."],
-      apiActions: ["createLead(data)", "updateLead(id, data)", "deleteLead(id)", "moveLeadStage(id, stage)", "createSalesActivity(data)", "getLeads(filters)", "getPipelineSummary(filters)", "getSalesReport(filters)"],
-      acceptance: ["User bisa membuat lead.", "User bisa mengubah stage pipeline.", "User bisa mencatat activity.", "Dashboard menampilkan pipeline value.", "User bisa melihat follow-up overdue.", "User bisa filter lead berdasarkan owner/stage/source.", "Lead detail menampilkan timeline.", "Report sales dasar tersedia."],
-      designTone: "CRM yang padat, task-oriented, dengan pipeline jelas dan prioritas follow-up yang menonjol.",
-    },
-    "task-management": {
-      domain,
-      label: "Task Management",
-      projectName: "Focus Task Board",
-      primaryEntity: "tasks",
-      primaryEntityLabel: "task",
-      activityEntity: "task_events",
-      settingsEntity: "workspace_settings",
-      targetUsers: ["Individu produktif", "Tim kecil", "Project manager", "Freelancer"],
-      roles: ["Member", "Project manager", "Admin"],
-      inputMethods: ["Task form", "Status board", "Deadline", "Assignee", "Priority"],
-      storedData: ["task", "project", "status", "priority", "assignee", "deadline", "comment", "activity"],
-      notifications: "Alert deadline dekat, task overdue, task assigned, dan status blocked.",
-      pages: ["Task Dashboard", "Kanban Board", "Task List", "Task Detail", "Projects", "Calendar", "Settings"],
-      questions: [
-        "Apakah task dipakai pribadi, tim kecil, atau banyak project?",
-        "Workflow status apa yang dibutuhkan: todo, doing, review, done, blocked?",
-        "Apakah perlu assignee, deadline, priority, tags, atau subtasks?",
-        "Apakah user butuh Kanban, list, calendar, atau semua view?",
-        "Apa report yang penting: overdue, workload, velocity, atau completion rate?",
-      ],
-      chips: [
-        ["Pribadi", "Tim kecil", "Multi project"],
-        ["Todo", "Doing", "Review", "Done", "Blocked"],
-        ["Assignee", "Deadline", "Priority", "Subtasks"],
-        ["Kanban", "List", "Calendar"],
-        ["Overdue", "Workload", "Completion rate"],
-      ],
-      features: [
-        createFeature("Task Dashboard", "Menampilkan task due soon, overdue, workload, dan progress project.", "Task, deadline, status, assignee.", "Metrik produktivitas dan prioritas hari ini.", "Dashboard harus membantu user tahu apa yang harus dikerjakan."),
-        createFeature("Task CRUD", "User dapat membuat, mengedit, menghapus, dan menyelesaikan task.", "Judul, deskripsi, status, deadline, priority.", "Task tersimpan dan bisa difilter.", "Validasi judul dan status wajib."),
-        createFeature("Kanban Board", "Task dikelompokkan berdasarkan status workflow.", "Status dan project.", "Board status dengan task cards.", "Drag-and-drop opsional."),
-        createFeature("Assignment & Priority", "Task bisa diberi assignee dan prioritas.", "Assignee, priority, tags.", "Task lebih mudah diprioritaskan.", "Untuk personal mode, assignee dapat disembunyikan."),
-        createFeature("Comments & Activity", "User dapat memberi komentar dan melihat perubahan task.", "Komentar, status change, actor.", "Timeline task.", "Memudahkan kolaborasi."),
-        createFeature("Calendar & Reports", "User melihat deadline di kalender dan laporan completion.", "Filter periode dan project.", "Calendar/list deadline dan report.", "MVP boleh pakai list deadline dulu."),
-      ],
-      flow: ["User membuka dashboard task.", "User membuat project atau memakai default workspace.", "User menambah task.", "User mengatur status, assignee, priority, deadline.", "User memindahkan task antar status.", "User membuka detail task dan komentar.", "Dashboard menampilkan overdue dan progress.", "User melihat report completion."],
-      apiActions: ["createTask(data)", "updateTask(id, data)", "deleteTask(id)", "moveTaskStatus(id, status)", "createTaskComment(data)", "getTasks(filters)", "getTaskSummary(filters)", "getProjectReport(projectId)"],
-      acceptance: ["User bisa membuat task.", "User bisa mengubah status task.", "User bisa filter task berdasarkan status/priority/assignee.", "Dashboard menampilkan overdue dan due soon.", "User bisa membuka detail task.", "Activity perubahan status tercatat.", "Kanban atau grouped list tersedia.", "UI usable di mobile."],
-      designTone: "UI produktivitas yang cepat, rapi, minim distraksi, dengan status dan prioritas sangat jelas.",
-    },
-    "content-management": {
-      domain,
-      label: "Content Management",
-      projectName: "Editorial Content Studio",
-      primaryEntity: "posts",
-      primaryEntityLabel: "konten/post",
-      activityEntity: "editorial_events",
-      settingsEntity: "content_settings",
-      targetUsers: ["Content creator", "Editor", "Marketing team", "Publisher"],
-      roles: ["Writer", "Editor", "Admin"],
-      inputMethods: ["Editor konten", "Media upload placeholder", "Status publish", "Kategori/tag"],
-      storedData: ["post", "category", "tag", "author", "status", "revision", "publish schedule"],
-      notifications: "Alert draft pending review, scheduled post, dan content yang perlu revisi.",
-      pages: ["Content Dashboard", "Posts", "Editor", "Categories", "Editorial Calendar", "Review Queue", "Settings"],
-      questions: [
-        "Konten yang dikelola berbentuk blog, artikel, landing page, dokumentasi, atau social content?",
-        "Apakah perlu workflow draft, review, approved, scheduled, published?",
-        "Apakah ada banyak author/editor atau admin tunggal?",
-        "Apakah butuh kategori, tag, SEO fields, dan revision history?",
-        "Apakah publishing langsung atau hanya manajemen konten internal dulu?",
-      ],
-      chips: [
-        ["Blog", "Artikel", "Dokumentasi", "Social content"],
-        ["Draft", "Review", "Scheduled", "Published"],
-        ["Admin tunggal", "Banyak author", "Editor approval"],
-        ["SEO fields", "Tags", "Revision history"],
-        ["Publish langsung", "Internal dulu", "Export content"],
-      ],
-      features: [
-        createFeature("Content Dashboard", "Menampilkan jumlah draft, review queue, scheduled posts, dan performa konten dasar.", "Post status, author, schedule.", "Ringkasan editorial.", "Fokus pada workload editorial."),
-        createFeature("Post Editor", "User dapat membuat dan mengedit konten dengan metadata.", "Judul, body, excerpt, category, tags, SEO.", "Konten tersimpan sebagai draft atau published.", "MVP bisa textarea markdown sederhana."),
-        createFeature("Workflow Status", "Konten bergerak dari draft ke review, scheduled, dan published.", "Status konten dan reviewer.", "Status editorial terbaru.", "Approval flow bisa sederhana."),
-        createFeature("Categories & Tags", "User mengelola taxonomy konten.", "Category, tag, slug.", "Konten lebih mudah difilter.", "Slug harus unik."),
-        createFeature("Revision History", "Sistem menyimpan perubahan penting pada konten.", "Revision event dan author.", "Riwayat revisi.", "MVP bisa simpan metadata perubahan dulu."),
-        createFeature("Editorial Calendar", "Scheduled content terlihat dalam kalender/list.", "Publish date dan status.", "Daftar konten terjadwal.", "Kalender penuh opsional."),
-      ],
-      flow: ["Writer membuat draft.", "Writer menambahkan kategori/tag/SEO.", "Writer mengirim ke review.", "Editor memberi feedback atau approve.", "Post dijadwalkan atau dipublish.", "Dashboard memperbarui queue.", "User melihat revision history.", "Admin mengelola kategori dan settings."],
-      apiActions: ["createPost(data)", "updatePost(id, data)", "deletePost(id)", "changePostStatus(id, status)", "createRevision(data)", "getPosts(filters)", "getEditorialSummary(filters)", "schedulePost(id, publishAt)"],
-      acceptance: ["User bisa membuat post.", "User bisa menyimpan draft.", "User bisa mengubah status editorial.", "User bisa filter post berdasarkan status/category/author.", "Post detail menampilkan metadata.", "Revision event tercatat.", "Scheduled posts terlihat.", "Slug atau title wajib tervalidasi."],
-      designTone: "Editorial UI yang tenang, readable, dengan editor luas dan queue status yang mudah dipantau.",
-    },
-    "e-commerce": {
-      domain,
-      label: "E-commerce",
-      projectName: "Commerce Starter Store",
-      primaryEntity: "orders",
-      primaryEntityLabel: "order/produk",
-      activityEntity: "order_events",
-      settingsEntity: "store_settings",
-      targetUsers: ["Pembeli", "Admin toko", "Owner", "Staff fulfillment"],
-      roles: ["Customer", "Store admin", "Fulfillment staff"],
-      inputMethods: ["Product catalog", "Cart", "Checkout manual", "Order status", "Inventory update"],
-      storedData: ["product", "customer", "cart", "order", "order item", "payment status", "shipment status"],
-      notifications: "Alert order baru, pembayaran pending, stok rendah, dan order siap dikirim.",
-      pages: ["Storefront", "Product Detail", "Cart", "Checkout", "Order Success", "Admin Dashboard", "Products", "Orders", "Settings"],
-      questions: [
-        "Produk yang dijual digital, fisik, jasa, atau campuran?",
-        "Apakah checkout butuh pembayaran online sekarang atau cukup order manual dulu?",
-        "Apakah perlu varian produk seperti ukuran, warna, paket, atau stok per varian?",
-        "Status order apa yang dibutuhkan: pending, paid, packed, shipped, completed, cancelled?",
-        "Apakah admin perlu kelola katalog, stok, promo, dan laporan penjualan?",
-      ],
-      chips: [
-        ["Produk fisik", "Produk digital", "Jasa", "Campuran"],
-        ["Order manual", "Payment later", "Payment gateway nanti"],
-        ["Ukuran", "Warna", "Paket", "Stok varian"],
-        ["Pending", "Paid", "Shipped", "Completed"],
-        ["Katalog", "Stok", "Promo", "Laporan"],
-      ],
-      features: [
-        createFeature("Product Catalog", "Customer dapat melihat produk, kategori, harga, dan stok.", "Product data, category, search.", "Grid/list produk dan detail produk.", "Gunakan gambar placeholder lokal bila belum ada asset."),
-        createFeature("Cart & Checkout", "Customer menambahkan produk ke cart dan membuat order.", "Product, quantity, customer info.", "Order baru dengan status pending.", "MVP tidak wajib payment gateway."),
-        createFeature("Order Management", "Admin melihat dan mengubah status order.", "Order status, fulfillment note.", "Status order terbaru dan event log.", "Order status harus konsisten."),
-        createFeature("Product Management", "Admin mengelola produk, harga, stok, kategori, dan status publish.", "Product fields dan inventory.", "Catalog terupdate.", "Validasi price dan stock wajib."),
-        createFeature("Customer Records", "Sistem menyimpan customer dan riwayat order.", "Nama, kontak, alamat opsional.", "Customer profile sederhana.", "Hindari data sensitif berlebihan."),
-        createFeature("Sales Dashboard", "Owner melihat total order, revenue, produk terlaris, dan pending fulfillment.", "Orders, products, period.", "Metrik toko.", "Revenue bisa dihitung dari order dummy/local."),
-      ],
-      flow: ["Customer melihat katalog.", "Customer membuka product detail.", "Customer menambah produk ke cart.", "Customer checkout manual.", "Admin melihat order baru.", "Admin mengubah status fulfillment.", "Customer/admin melihat detail order.", "Owner melihat laporan penjualan."],
-      apiActions: ["createProduct(data)", "updateProduct(id, data)", "deleteProduct(id)", "createOrder(data)", "updateOrderStatus(id, status)", "getOrders(filters)", "getProducts(filters)", "getStoreSummary(filters)"],
-      acceptance: ["Customer bisa melihat katalog.", "Customer bisa menambah produk ke cart.", "Customer bisa membuat order.", "Admin bisa mengubah status order.", "Admin bisa mengelola produk.", "Stok berkurang saat order dibuat jika fitur stok aktif.", "Dashboard menampilkan order/revenue dasar.", "Checkout tidak membutuhkan payment API pada MVP."],
-      designTone: "Storefront bersih dan admin dashboard operasional, dengan fokus pada katalog, cart, dan order fulfillment.",
-    },
-    "saas-dashboard": {
-      domain,
-      label: "SaaS Dashboard",
-      projectName: "SaaS Metrics Console",
-      primaryEntity: "metrics",
-      primaryEntityLabel: "metric/dashboard item",
-      activityEntity: "dashboard_events",
-      settingsEntity: "tenant_settings",
-      targetUsers: ["Founder", "Admin SaaS", "Ops team", "Customer success"],
-      roles: ["Owner", "Admin", "Member", "Viewer"],
-      inputMethods: ["Metric input", "Filter date range", "Workspace setting", "Report view"],
-      storedData: ["workspace", "metric", "event", "report", "user role", "subscription placeholder"],
-      notifications: "Alert metric turun, target tidak tercapai, trial hampir selesai, atau anomaly sederhana.",
-      pages: ["Overview Dashboard", "Metrics", "Reports", "Users & Roles", "Workspace Settings", "Billing Placeholder", "Activity"],
-      questions: [
-        "Dashboard ini memantau metrik apa: revenue, users, operations, marketing, support, atau product analytics?",
-        "Apakah aplikasi multi-tenant, satu workspace, atau dashboard internal saja?",
-        "Role user apa yang dibutuhkan: owner, admin, member, viewer?",
-        "Apakah data metric diinput manual dulu atau nanti dari API/integrasi?",
-        "Report dan alert apa yang paling penting untuk user?",
-      ],
-      chips: [
-        ["Revenue", "Users", "Operations", "Marketing", "Support"],
-        ["Multi-tenant", "Single workspace", "Internal dashboard"],
-        ["Owner", "Admin", "Member", "Viewer"],
-        ["Input manual", "CSV import", "API nanti"],
-        ["Weekly report", "Anomaly alert", "Target tracking"],
-      ],
-      features: [
-        createFeature("Overview Dashboard", "Menampilkan KPI utama, tren, target, dan aktivitas terbaru.", "Metric data, date range, workspace.", "Kartu KPI, tren sederhana, dan status target.", "MVP bisa input manual dulu."),
-        createFeature("Metric Management", "Admin dapat membuat dan memperbarui metric yang dipantau.", "Nama metric, value, target, periode.", "Metric tersimpan dan muncul di dashboard.", "Validasi angka dan periode."),
-        createFeature("Reports", "User melihat report periodik berdasarkan filter.", "Date range dan metric group.", "Summary report dan table.", "Export report opsional."),
-        createFeature("Users & Roles", "Owner mengatur anggota workspace dan role.", "Email, role, workspace.", "Daftar user dan permission.", "Auth sungguhan bisa fase berikutnya."),
-        createFeature("Workspace Settings", "User mengatur preferensi dashboard, target, dan threshold alert.", "Settings key/value.", "Konfigurasi tersimpan.", "Gunakan local/dummy data untuk MVP."),
-        createFeature("Activity & Audit", "Sistem mencatat perubahan metric dan settings.", "Actor, action, metadata.", "Activity timeline.", "Penting untuk dashboard bisnis."),
-      ],
-      flow: ["Owner masuk ke dashboard.", "Owner membuat workspace atau memakai demo workspace.", "Owner menambahkan metric dan target.", "Dashboard menampilkan KPI dan tren.", "User memfilter periode.", "User membuka report.", "Owner mengatur role/settings.", "Activity log mencatat perubahan."],
-      apiActions: ["createMetric(data)", "updateMetric(id, data)", "deleteMetric(id)", "getMetrics(filters)", "getDashboardOverview(workspaceId, filters)", "createWorkspaceSetting(data)", "inviteWorkspaceUser(data)", "getActivityLog(workspaceId)"],
-      acceptance: ["Dashboard menampilkan minimal 4 KPI.", "User bisa menambah metric.", "User bisa mengubah target/threshold.", "User bisa filter berdasarkan periode.", "Report dasar tersedia.", "Role list tersedia walau auth masih demo.", "Activity log tercatat.", "Build deployable ke Vercel."],
-      designTone: "SaaS admin yang profesional, padat, dan mudah dipindai, dengan hierarchy data yang kuat.",
-    },
-    "ai-agent": {
-      domain,
-      label: "AI Agent",
-      projectName: "Asisten AI Operasional",
-      primaryEntity: "agent_tasks",
-      primaryEntityLabel: "tugas agent",
-      activityEntity: "agent_runs",
-      settingsEntity: "agent_settings",
-      targetUsers: ["Pemilik bisnis", "Tim operasional", "Knowledge worker", "Admin internal"],
-      roles: ["Pengguna", "Admin", "Reviewer"],
-      inputMethods: ["Instruksi pengguna", "Sumber data terhubung", "Approval manual", "Feedback hasil agent"],
-      storedData: ["tugas agent", "riwayat eksekusi", "memory", "integrasi", "izin akses", "feedback pengguna"],
-      notifications: "Peringatan saat agent membutuhkan approval, gagal menjalankan aksi, atau menemukan risiko pada data.",
-      pages: ["Dashboard Agent", "Buat Tugas", "Riwayat Eksekusi", "Memory", "Integrasi", "Approval Queue", "Pengaturan"],
-      questions: [
-        "AI agent ini paling sering membantu aktivitas apa?",
-        "Agent hanya memberi saran atau boleh menjalankan aksi otomatis?",
-        "Data apa yang boleh dibaca oleh agent?",
-        "Apakah agent perlu memory jangka panjang?",
-        "Integrasi apa yang dibutuhkan?",
-      ],
-      chips: [
-        ["Riset", "Administrasi", "Analisis data", "Customer support"],
-        ["Hanya saran", "Aksi dengan approval", "Aksi otomatis terbatas"],
-        ["Dokumen", "Email", "CRM", "Database internal"],
-        ["Tidak perlu", "Memory per user", "Memory per project"],
-        ["Google Drive", "Slack", "Email", "API internal"],
-      ],
-      features: [
-        createFeature("Dashboard Agent", "Menampilkan tugas aktif, eksekusi terakhir, status approval, dan risiko yang perlu ditinjau.", "Tugas agent, status eksekusi, izin akses.", "Ringkasan operasional agent dan prioritas tindakan.", "Dashboard harus menjelaskan apa yang sedang dilakukan agent."),
-        createFeature("Pembuatan Tugas Agent", "Pengguna dapat membuat tugas dengan tujuan, konteks, batasan, dan hasil yang diharapkan.", "Instruksi, sumber data, batasan aksi, format output.", "Tugas agent tersimpan dan siap diproses.", "Instruksi harus divalidasi agar tidak terlalu ambigu."),
-        createFeature("Approval dan Kontrol Aksi", "Agent dapat meminta persetujuan sebelum menjalankan aksi berisiko.", "Permintaan approval, alasan, ringkasan dampak.", "Keputusan approve/reject dan catatan reviewer.", "Aksi otomatis harus dibatasi oleh permission."),
-        createFeature("Memory Agent", "Sistem menyimpan preferensi dan konteks penting sesuai izin pengguna.", "Key memory, scope, sumber, tanggal update.", "Memory yang bisa dipakai untuk tugas berikutnya.", "Memory harus bisa dilihat, diedit, dan dihapus."),
-        createFeature("Integrasi Data", "Admin dapat mengatur sumber data yang boleh dibaca agent.", "Jenis integrasi, permission, status koneksi.", "Daftar integrasi aktif dan batas akses.", "MVP dapat memakai data dummy tanpa koneksi sungguhan."),
-        createFeature("Riwayat Eksekusi", "Semua hasil dan keputusan agent tersimpan sebagai audit trail.", "Run log, input, output, status, feedback.", "Timeline eksekusi dan evaluasi kualitas.", "Audit penting untuk trust dan debugging."),
-      ],
-      flow: ["Pengguna masuk ke dashboard agent.", "Pengguna membuat tugas baru untuk agent.", "Sistem memvalidasi instruksi dan sumber data.", "Agent menyiapkan hasil atau meminta approval.", "Pengguna meninjau hasil dan memberi feedback.", "Jika disetujui, aksi dijalankan sesuai batasan.", "Riwayat eksekusi dan memory diperbarui.", "Admin mengelola integrasi dan permission."],
-      apiActions: ["createAgentTask(data)", "runAgentTask(id)", "approveAgentAction(id, decision)", "getAgentRuns(filters)", "saveAgentMemory(data)", "deleteAgentMemory(id)", "getIntegrations(userId)", "createAgentFeedback(data)"],
-      acceptance: ["Pengguna bisa membuat tugas agent.", "Agent task memiliki status yang jelas.", "Aksi berisiko membutuhkan approval.", "Memory bisa dilihat dan dihapus.", "Riwayat eksekusi tersimpan.", "Integrasi dummy bisa dikonfigurasi.", "Feedback pengguna bisa dicatat.", "Tidak ada API key yang terekspos di frontend."],
-      designTone: "UI agent yang transparan, menjelaskan status, izin, risiko, dan hasil dengan bahasa yang mudah dipahami.",
-    },
-    "generic-web-app": {
-      domain,
-      label: "Generic Web App",
-      projectName: `${titleCase(idea) || "Smart Workflow"} App`,
-      primaryEntity: "records",
-      primaryEntityLabel: "data utama",
-      activityEntity: "activity_logs",
-      settingsEntity: "settings",
-      targetUsers: ["Pengguna non-teknis", "Admin operasional", "Pemilik bisnis kecil", "Tim internal"],
-      roles: ["Demo user", "Admin", "Staff"],
-      inputMethods: ["Input manual", "Form data", "Pencarian/filter", "Export data"],
-      storedData: ["record utama", "status", "kategori", "catatan", "riwayat aktivitas", "preferensi user"],
-      notifications: "Alert visual untuk status penting, item baru, atau data yang perlu ditindaklanjuti.",
-      pages: ["Landing / Onboarding", "Dashboard", "Data List", "Create / Edit Form", "Detail Page", "Reports", "Settings"],
-      questions: genericQuestions,
-      chips: genericChips,
-      features: [
-        createFeature("Dashboard Utama", "Menampilkan metrik utama, aktivitas terbaru, dan item yang butuh aksi.", "Data utama, status, periode.", "Kartu metrik, activity list, dan quick actions.", "Harus tetap informatif dengan data dummy."),
-        createFeature("Manajemen Data", "User dapat membuat, melihat, mengedit, menghapus, mencari, dan memfilter data utama.", "Field utama, status, kategori, catatan.", "Data tersimpan dan dapat dikelola.", "Validasi field wajib."),
-        createFeature("Detail dan Riwayat", "User melihat detail data dan riwayat perubahan.", "ID data dan activity events.", "Detail page dan timeline.", "Activity log membantu audit."),
-        createFeature("Search dan Filter", "User menemukan data berdasarkan keyword, status, kategori, atau periode.", "Keyword dan filter.", "List terfilter.", "Filter bekerja tanpa refresh penuh."),
-        createFeature("Report / Export", "User melihat ringkasan dan mengekspor data.", "Filter aktif dan format export.", "CSV atau print-friendly report.", "Tidak membutuhkan service eksternal."),
-      ],
-      flow: ["User masuk sebagai demo user.", "User melihat dashboard.", "User menambah data utama.", "User melihat list data.", "User membuka detail data.", "User mengedit/menghapus data.", "Activity log tercatat.", "User export laporan."],
-      apiActions: ["createRecord(data)", "updateRecord(id, data)", "deleteRecord(id)", "getRecords(filters)", "getRecordById(id)", "getDashboardSummary(filters)", "createActivityLog(data)", "exportRecords(filters)"],
-      acceptance: ["User bisa menambahkan data utama.", "User bisa melihat list data.", "User bisa mengedit data.", "User bisa menghapus data.", "User bisa mencari dan memfilter.", "Dashboard menampilkan minimal 3 metrik.", "Activity log tersedia.", "UI responsive dan build production berhasil."],
-      designTone: "UI web app modern, rapi, mudah dipakai user non-teknis, dan siap dikembangkan.",
-    },
-  };
-
-  return profiles[domain];
+function getProfile(domain: ProjectDomain) {
+  return profiles[domain] || profiles["generic-web-app"];
 }
 
 export function getDynamicQuestions(domain: ProjectDomain, language: AppLanguage = "id") {
-  if (language === "en") {
-    return englishQuestionsByDomain[domain].questions;
-  }
-
-  return getDomainProfile(domain, "").questions.map(normalizeUserFacingText);
+  const profile = getProfile(domain);
+  return language === "en" ? profile.questionsEn : profile.questionsId;
 }
 
 export function getDynamicQuestionChips(domain: ProjectDomain, language: AppLanguage = "id") {
-  if (language === "en") {
-    return englishQuestionsByDomain[domain].chips;
-  }
-
-  return getDomainProfile(domain, "").chips.map((group) => group.map(normalizeUserFacingText));
+  const profile = getProfile(domain);
+  return language === "en" ? profile.chipsEn : profile.chipsId;
 }
 
-export function inferRecommendedStack(domain: ProjectDomain, idea: string): StackRecommendation {
-  const lower = idea.toLowerCase();
-  const isSimple = includesAny(lower, ["pribadi", "personal", "demo", "internal", "mvp"]);
-
-  if (domain === "learning-app") {
+function getStack(input: GeneratePRDInput) {
+  if (input.techMode === "manual") {
     return {
-      frontend: "Next.js App Router",
-      backend: "Server Actions",
-      database: "Supabase Postgres",
-      deployment: "Vercel",
-      reason: "Learning app membutuhkan struktur relational untuk course, lesson, quiz, dan progress, tetapi tetap cepat dibuat sebagai MVP Next.js.",
-    };
-  }
-
-  if (domain === "inventory" || domain === "crm-sales" || domain === "e-commerce") {
-    return {
-      frontend: "Next.js App Router",
-      backend: "Next.js API Routes or Server Actions",
-      database: "PostgreSQL or Supabase Postgres",
-      deployment: "Vercel",
-      reason: "Domain ini membutuhkan relational data, audit trail, filter kuat, dan peluang multi-user sehingga Postgres/Supabase paling aman untuk scale awal.",
-    };
-  }
-
-  if (domain === "finance-tracker") {
-    return {
-      frontend: "Next.js App Router",
-      backend: "Server Actions",
-      database: isSimple ? "SQLite for MVP, Supabase Postgres for production" : "Supabase Postgres",
-      deployment: "Vercel",
-      reason: "Finance tracker perlu query periode, kategori, dan summary. SQLite cukup untuk MVP pribadi, Supabase lebih cocok untuk multi-user.",
-    };
-  }
-
-  if (domain === "task-management" || domain === "content-management") {
-    return {
-      frontend: "Next.js App Router",
-      backend: "Server Actions",
-      database: "Supabase Postgres",
-      deployment: "Vercel",
-      reason: "Workflow, status, dan riwayat perubahan cocok dengan relational schema dan server actions yang sederhana.",
+      frontend: input.selectedTech.frontend || "Next.js",
+      backend: input.selectedTech.backend || "Next.js Server Actions",
+      database: input.selectedTech.database || "PostgreSQL/Supabase",
+      deployment: input.selectedTech.deployment || "Vercel",
     };
   }
 
   return {
     frontend: "Next.js App Router",
-    backend: "Server Actions or Next.js API Routes",
-    database: "Supabase Postgres",
+    backend: "Next.js Server Actions atau API Routes",
+    database: "PostgreSQL/Supabase atau SQLite untuk MVP lokal",
     deployment: "Vercel",
-    reason: "Stack ini cepat untuk MVP, mudah dideploy, kuat untuk dashboard CRUD, dan mudah dikembangkan ke auth/database sungguhan.",
   };
 }
 
-function getFinalStack(input: GeneratePRDInput, domain: ProjectDomain): StackRecommendation {
-  if (input.techMode === "manual") {
-    return {
-      frontend: input.selectedTech.frontend || "Next.js",
-      backend: input.selectedTech.backend || "Next.js API Routes",
-      database: input.selectedTech.database || "Supabase",
-      deployment: input.selectedTech.deployment || "Vercel",
-      reason: "Stack mengikuti pilihan user. AI coding agent harus menghormati pilihan ini kecuali ada konflik teknis yang jelas.",
-    };
-  }
-
-  return inferRecommendedStack(domain, input.idea);
-}
-
-export function generateDatabaseSchema(domain: ProjectDomain, idea: string): DatabaseTable[] {
-  const profile = getDomainProfile(domain, idea);
-  const baseUsers: DatabaseTable = {
-    name: "users",
-    description: "Menyimpan identitas user, role, dan metadata akun.",
-    fields: ["id int PK", "email string unique", "name string", "role string", "created_at datetime", "updated_at datetime"],
-  };
-
-  const activity: DatabaseTable = {
-    name: profile.activityEntity,
-    description: "Menyimpan riwayat aksi penting untuk audit trail dan timeline.",
-    fields: ["id int PK", "user_id int FK", `${singularSnake(profile.primaryEntity)}_id int FK`, "action string", "metadata_json string", "created_at datetime"],
-  };
-
-  const settings: DatabaseTable = {
-    name: profile.settingsEntity,
-    description: "Menyimpan preferensi, threshold, konfigurasi dashboard, dan setting domain.",
-    fields: ["id int PK", "user_id int FK", "key string", "value_json string", "created_at datetime", "updated_at datetime"],
-  };
-
-  const tableByDomain: Record<ProjectDomain, DatabaseTable[]> = {
-    "finance-tracker": [
-      baseUsers,
-      { name: "transactions", description: "Menyimpan pemasukan, pengeluaran, hutang, tagihan, dan saldo movement.", fields: ["id int PK", "user_id int FK", "type string", "category_id int FK", "amount decimal", "notes string", "transaction_date date", "is_recurring boolean", "created_at datetime", "updated_at datetime"] },
-      { name: "categories", description: "Kategori transaksi dan budget.", fields: ["id int PK", "user_id int FK", "name string", "type string", "monthly_budget decimal", "color string"] },
-      { name: "bills", description: "Tagihan dan reminder jatuh tempo.", fields: ["id int PK", "user_id int FK", "name string", "amount decimal", "due_date date", "status string"] },
-      activity,
-      settings,
-    ],
-    inventory: [
-      baseUsers,
-      { name: "products", description: "Master produk/SKU yang tersedia di gudang.", fields: ["id int PK", "sku string unique", "name string", "category string", "supplier_id int FK", "min_stock int", "current_stock int", "created_at datetime", "updated_at datetime"] },
-      { name: "stock_movements", description: "Riwayat stok masuk dan keluar.", fields: ["id int PK", "product_id int FK", "user_id int FK", "type string", "quantity int", "reason string", "location_id int FK", "batch_number string", "created_at datetime"] },
-      { name: "locations", description: "Lokasi gudang, rak, atau cabang.", fields: ["id int PK", "name string", "code string", "description string"] },
-      { name: "suppliers", description: "Supplier produk.", fields: ["id int PK", "name string", "contact string", "notes string"] },
-      settings,
-    ],
-    "booking-system": [
-      baseUsers,
-      { name: "services", description: "Layanan yang dapat dibooking.", fields: ["id int PK", "name string", "duration_minutes int", "price decimal", "capacity int", "is_active boolean"] },
-      { name: "booking_slots", description: "Slot jadwal yang tersedia.", fields: ["id int PK", "service_id int FK", "starts_at datetime", "ends_at datetime", "capacity int", "remaining_capacity int"] },
-      { name: "bookings", description: "Data booking customer.", fields: ["id int PK", "service_id int FK", "slot_id int FK", "customer_name string", "customer_contact string", "status string", "notes string", "created_at datetime", "updated_at datetime"] },
-      activity,
-      settings,
-    ],
-    "learning-app": [
-      baseUsers,
-      { name: "courses", description: "Kumpulan materi belajar.", fields: ["id int PK", "title string", "description string", "level string", "created_at datetime"] },
-      { name: "lessons", description: "Lesson di dalam course.", fields: ["id int PK", "course_id int FK", "title string", "content text", "sort_order int", "created_at datetime"] },
-      { name: "quizzes", description: "Kuis dan pertanyaan untuk lesson.", fields: ["id int PK", "lesson_id int FK", "question text", "options_json string", "correct_answer string"] },
-      { name: "student_progress", description: "Progress dan skor learner.", fields: ["id int PK", "user_id int FK", "course_id int FK", "lesson_id int FK", "score int", "completed_at datetime"] },
-      settings,
-    ],
-    "crm-sales": [
-      baseUsers,
-      { name: "leads", description: "Prospek dan customer potensial.", fields: ["id int PK", "owner_id int FK", "name string", "company string", "email string", "phone string", "source string", "stage string", "deal_value decimal", "next_follow_up date", "created_at datetime"] },
-      { name: "sales_activities", description: "Call, meeting, email, dan notes sales.", fields: ["id int PK", "lead_id int FK", "user_id int FK", "type string", "notes text", "activity_at datetime"] },
-      { name: "pipeline_stages", description: "Konfigurasi stage pipeline.", fields: ["id int PK", "name string", "sort_order int", "probability int"] },
-      settings,
-    ],
-    "task-management": [
-      baseUsers,
-      { name: "projects", description: "Workspace/project tempat task dikelompokkan.", fields: ["id int PK", "name string", "description string", "owner_id int FK", "created_at datetime"] },
-      { name: "tasks", description: "Task yang harus dikerjakan.", fields: ["id int PK", "project_id int FK", "assignee_id int FK", "title string", "description text", "status string", "priority string", "due_date date", "created_at datetime", "updated_at datetime"] },
-      { name: "task_comments", description: "Komentar pada task.", fields: ["id int PK", "task_id int FK", "user_id int FK", "body text", "created_at datetime"] },
-      activity,
-      settings,
-    ],
-    "content-management": [
-      baseUsers,
-      { name: "posts", description: "Konten utama seperti artikel atau halaman.", fields: ["id int PK", "author_id int FK", "title string", "slug string unique", "body text", "status string", "published_at datetime", "created_at datetime", "updated_at datetime"] },
-      { name: "categories", description: "Kategori konten.", fields: ["id int PK", "name string", "slug string unique"] },
-      { name: "tags", description: "Tag konten.", fields: ["id int PK", "name string", "slug string unique"] },
-      { name: "revisions", description: "Riwayat revisi konten.", fields: ["id int PK", "post_id int FK", "user_id int FK", "snapshot_json string", "created_at datetime"] },
-      activity,
-      settings,
-    ],
-    "e-commerce": [
-      baseUsers,
-      { name: "products", description: "Produk katalog toko.", fields: ["id int PK", "name string", "slug string unique", "description text", "price decimal", "stock int", "status string", "created_at datetime"] },
-      { name: "customers", description: "Data customer order.", fields: ["id int PK", "name string", "email string", "phone string", "address text"] },
-      { name: "orders", description: "Order dari customer.", fields: ["id int PK", "customer_id int FK", "status string", "total decimal", "payment_status string", "created_at datetime", "updated_at datetime"] },
-      { name: "order_items", description: "Item produk di dalam order.", fields: ["id int PK", "order_id int FK", "product_id int FK", "quantity int", "unit_price decimal", "line_total decimal"] },
-      activity,
-      settings,
-    ],
-    "saas-dashboard": [
-      baseUsers,
-      { name: "workspaces", description: "Tenant atau workspace dashboard.", fields: ["id int PK", "name string", "owner_id int FK", "plan string", "created_at datetime"] },
-      { name: "metrics", description: "Metric/KPI yang dipantau.", fields: ["id int PK", "workspace_id int FK", "name string", "value decimal", "target decimal", "period date", "created_at datetime"] },
-      { name: "workspace_members", description: "User dan role dalam workspace.", fields: ["id int PK", "workspace_id int FK", "user_id int FK", "role string", "created_at datetime"] },
-      activity,
-      settings,
-    ],
-    "ai-agent": [
-      baseUsers,
-      { name: "agent_tasks", description: "Tugas yang diminta pengguna kepada agent.", fields: ["id int PK", "user_id int FK", "title string", "instruction text", "status string", "risk_level string", "created_at datetime", "updated_at datetime"] },
-      { name: "agent_runs", description: "Riwayat eksekusi agent dan hasilnya.", fields: ["id int PK", "agent_task_id int FK", "status string", "input_json string", "output_text text", "error_message text", "created_at datetime"] },
-      { name: "agent_memories", description: "Memory jangka panjang sesuai izin pengguna.", fields: ["id int PK", "user_id int FK", "scope string", "key string", "value text", "source string", "updated_at datetime"] },
-      { name: "agent_integrations", description: "Daftar sumber data atau integrasi yang boleh diakses agent.", fields: ["id int PK", "user_id int FK", "provider string", "permission string", "status string", "created_at datetime"] },
-      settings,
-    ],
-    "generic-web-app": [
-      baseUsers,
-      { name: "records", description: "Data utama aplikasi.", fields: ["id int PK", "user_id int FK", "title string", "category string", "status string", "notes text", "created_at datetime", "updated_at datetime"] },
-      activity,
-      settings,
-    ],
-  };
-
-  return tableByDomain[domain];
-}
-
-export function generateCoreFeatures(domain: ProjectDomain, answers: PrdAnswer[]) {
-  const profile = getDomainProfile(domain, "");
-  const answerText = answers.map((answer) => answer.answer).join(" ").toLowerCase();
-  const features = [...profile.features];
-
-  if (includesAny(answerText, ["export", "csv", "pdf", "laporan"])) {
-    features.push(createFeature("Advanced Export", "User dapat mengekspor data sesuai filter yang aktif untuk laporan atau backup.", "Filter periode, kategori, status, dan format.", "CSV atau print-friendly report.", "Implementasi harus lokal dulu tanpa API eksternal."));
-  }
-
-  if (includesAny(answerText, ["reminder", "alert", "notifikasi"])) {
-    features.push(createFeature("Smart Alerts", "Aplikasi menampilkan alert visual untuk kondisi penting yang butuh tindakan user.", "Threshold, tanggal, status, dan event domain.", "Alert dashboard dan badge status.", "MVP cukup visual alert, email/push notification dapat masuk fase berikutnya."));
-  }
-
-  if (includesAny(answerText, ["multi admin", "banyak admin", "team", "tim", "role"])) {
-    features.push(createFeature("Role & Team Access", "Aplikasi menyiapkan role dasar agar data dan aksi dapat dipisahkan per tipe user.", "Role user, ownership, permission.", "Kontrol akses dasar dan UI sesuai role.", "Untuk MVP bisa demo role tanpa auth eksternal."));
-  }
-
-  return features.slice(0, 8);
-}
-
-function getAnsweredContext(answers: PrdAnswer[]) {
-  const filled = answers.filter((item) => cleanText(item.answer));
+function answersBlock(answers: PrdAnswer[], language: AppLanguage) {
+  const filled = answers.filter((answer) => cleanText(answer.answer));
   if (!filled.length) {
-    return "- User belum menambahkan jawaban tambahan. Gunakan asumsi domain yang paling masuk akal dan buat MVP mudah divalidasi.";
+    return language === "en"
+      ? "- No clarification answers yet. Ask questions before generating a final PRD if this is used interactively."
+      : "- Belum ada jawaban klarifikasi. Jika dipakai secara interaktif, assistant wajib bertanya dulu sebelum PRD final.";
   }
 
   return filled
-    .map((item, index) => `${index + 1}. ${item.question}\n   Jawaban: ${cleanText(item.answer)}`)
+    .map((answer, index) =>
+      language === "en"
+        ? `${index + 1}. ${answer.question}\n   Answer: ${cleanText(answer.answer)}`
+        : `${index + 1}. ${answer.question}\n   Jawaban: ${cleanText(answer.answer)}`,
+    )
     .join("\n");
 }
 
-function renderCoreFeatures(features: CoreFeature[]) {
+function renderFeatures(features: Feature[], language: AppLanguage) {
   return features
     .map(
-      (feature, index) => `### 3.${index + 1} ${feature.name}
-- **Deskripsi:** ${feature.description}
-- **Input:** ${feature.input}
-- **Output:** ${feature.output}
-- **Catatan:** ${feature.notes}`,
+      (item, index) => `${index + 1}. **${item.name}**
+   - ${item.description}
+   - ${language === "en" ? "Main input" : "Input utama"}: ${item.input}
+   - ${language === "en" ? "Main output" : "Output utama"}: ${item.output}
+   - ${language === "en" ? "Important note" : "Catatan penting"}: ${item.notes}`,
     )
     .join("\n\n");
 }
 
-function singularSnake(text: string) {
-  return text.endsWith("s") ? text.slice(0, -1) : text;
+function renderFlow(flow: string[], language: AppLanguage) {
+  const labels =
+    language === "en"
+      ? ["Login / Initial Access", "Initial Setup", "Main Action", "Monitoring / Dashboard", "Verification / History", "Reports / Export"]
+      : ["Login / Akses Awal", "Setup Awal", "Aksi Utama", "Monitoring / Dashboard", "Verifikasi / Riwayat", "Laporan / Export"];
+
+  return labels.map((label, index) => `${index + 1}. **${label}:** ${flow[index] || flow[flow.length - 1]}`).join("\n");
 }
 
-function pascal(text: string) {
-  return text
-    .split(/[_-\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
+function renderArchitecture(profile: DomainProfile, language: AppLanguage) {
+  const isEn = language === "en";
+  const label = isEn ? profile.labelEn : profile.labelId;
+  const primary = profile.tables[1]?.name || "items";
+
+  return `${isEn ? "The system uses a simple web architecture. The user works in the browser, the frontend sends validated actions to the backend, and the backend stores domain data in the database." : "Arsitektur sistem dibuat sederhana. User bekerja dari browser, frontend mengirim aksi tervalidasi ke backend, lalu backend menyimpan data domain ke database."}
+
+\`\`\`mermaid
+sequenceDiagram
+    participant User as ${isEn ? "User (Browser)" : "User (Browser)"}
+    participant UI as Frontend (Next.js)
+    participant Server as Backend Logic
+    participant DB as Database
+
+    Note over User, DB: ${isEn ? `Main ${label} process` : `Proses utama ${label}`}
+
+    User->>UI: ${isEn ? "Input data or choose action" : "Input data atau pilih aksi"}
+    UI->>Server: ${isEn ? "Send validated request" : "Kirim request tervalidasi"}
+    Server->>Server: ${isEn ? "Validate business rules and user access" : "Validasi aturan bisnis dan akses user"}
+    Server->>DB: ${isEn ? `Save/update ${primary}` : `Simpan/update ${primary}`}
+    DB-->>Server: ${isEn ? "Return latest data" : "Kirim data terbaru"}
+    Server-->>UI: ${isEn ? "Return success/error response" : "Kirim status sukses/error"}
+    UI-->>User: ${isEn ? "Show dashboard/list update" : "Tampilkan update di dashboard/list"}
+\`\`\``;
 }
 
-function pascalSingular(text: string) {
-  return pascal(singularSnake(text));
-}
-
-function renderErd(tables: DatabaseTable[], profile: DomainProfile) {
-  const tableBlocks = tables
+function renderErd(profile: DomainProfile) {
+  const blocks = profile.tables
     .map(
       (table) => `    ${table.name} {
 ${table.fields.map((field) => `        ${field}`).join("\n")}
     }`,
     )
     .join("\n\n");
+  const relationships = profile.tables
+    .filter((table) => table.name !== "users")
+    .slice(0, 5)
+    .map((table) => `    users ||--o{ ${table.name} : "owns"`)
+    .join("\n");
 
   return `\`\`\`mermaid
 erDiagram
-${tableBlocks}
+${blocks}
 
-    users ||--o{ ${profile.primaryEntity} : "owns"
-    users ||--o{ ${profile.activityEntity} : "creates"
-    users ||--o{ ${profile.settingsEntity} : "configures"
-    ${profile.primaryEntity} ||--o{ ${profile.activityEntity} : "has history"
+${relationships}
 \`\`\`
 
 | Tabel | Deskripsi |
 | --- | --- |
-${tables.map((table) => `| ${table.name} | ${table.description} |`).join("\n")}`;
+${profile.tables.map((table) => `| ${table.name} | ${table.description} |`).join("\n")}`;
 }
 
-function renderArchitecture(profile: DomainProfile) {
-  return `Arsitektur aplikasi dibuat sederhana dan mudah dikembangkan. Browser menampilkan UI, frontend mengirim aksi ke server actions/API, backend melakukan validasi dan authorization, lalu database menyimpan ${profile.primaryEntityLabel}, settings, dan activity log. Untuk MVP tanpa service eksternal, persistence dapat dimulai dari data dummy lokal dan helper function yang bentuknya menyerupai repository/database layer.
+function renderApi(profile: DomainProfile, language: AppLanguage) {
+  const isEn = language === "en";
+  return `${profile.apiActions
+    .map(
+      (action) => `### ${action}
+${isEn ? "Purpose" : "Tujuan"}: ${isEn ? `Run a main action for ${profile.labelEn}.` : `Menjalankan aksi utama terkait ${profile.labelId}.`}
+Input: ${isEn ? "Validated data object based on the form/domain." : "Object data tervalidasi sesuai form/domain."}
+Output: \`{ success: boolean, data?: unknown, error?: string }\`.
+${isEn ? "Validation" : "Validasi"}: ${isEn ? "Required fields cannot be empty, data types must be correct, and users can only access their own data." : "Field wajib tidak boleh kosong, tipe data harus benar, dan user hanya boleh mengakses data miliknya."}`,
+    )
+    .join("\n\n")}
 
-\`\`\`mermaid
-sequenceDiagram
-    participant Pengguna as Browser Pengguna
-    participant UI as Frontend
-    participant API as Backend/API
-    participant DB as Database
-
-    Pengguna->>UI: Mengisi form atau menjalankan aksi
-    UI->>API: Mengirim request yang sudah divalidasi
-    API->>API: Mengecek akses pengguna dan aturan domain
-    API->>DB: Menyimpan ${profile.primaryEntityLabel} dan activity log
-    DB-->>API: Mengembalikan data tersimpan
-    API-->>UI: Mengembalikan sukses atau error validasi
-    UI-->>Pengguna: Memperbarui dashboard, list, dan peringatan
-\`\`\``;
-}
-
-function renderApiSpec(profile: DomainProfile, backend: string) {
-  const useServerActions = backend.toLowerCase().includes("server action") || backend.toLowerCase().includes("next.js");
-
-  if (useServerActions) {
-    return `Gunakan Server Actions atau fungsi lokal dengan kontrak berikut:
-
-\`\`\`ts
-${profile.apiActions.join("\n")}
-\`\`\`
-
-Pola response:
-
-\`\`\`ts
-type ActionResponse<T> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
-\`\`\`
-
-Aturan implementasi:
-- Semua mutation wajib validasi input.
-- Semua query menerima filter domain seperti keyword, status, date range, page, dan limit jika relevan.
-- Pisahkan data logic di folder lib agar mudah diganti dari dummy data ke database sungguhan.`;
-  }
-
-  return `Gunakan API Routes dengan kontrak awal berikut:
-
-### POST /api/${profile.primaryEntity}
-Request:
-
-\`\`\`json
-{
-  "title": "string",
-  "status": "string",
-  "notes": "string"
-}
-\`\`\`
-
-Response:
-
+${isEn ? "Response example" : "Contoh response"}:
 \`\`\`json
 {
   "success": true,
   "data": {}
 }
-\`\`\`
-
-### GET /api/${profile.primaryEntity}?keyword=:keyword&status=:status&page=:page
-Mengembalikan daftar ${profile.primaryEntityLabel} berdasarkan filter.
-
-### PATCH /api/${profile.primaryEntity}/:id
-Mengubah ${profile.primaryEntityLabel}.
-
-### DELETE /api/${profile.primaryEntity}/:id
-Menghapus ${profile.primaryEntityLabel}.
-
-### GET /api/dashboard/summary
-Mengembalikan metrik dashboard sesuai domain ${profile.label}.`;
+\`\`\``;
 }
 
-function renderFinalAgentPrompt(
-  input: GeneratePRDInput,
-  domain: ProjectDomain,
-  profile: DomainProfile,
-  tech: StackRecommendation,
-  tables: DatabaseTable[],
-  features: CoreFeature[],
-) {
+function renderPrompt(input: GeneratePRDInput, profile: DomainProfile, features: Feature[], language: AppLanguage) {
+  const stack = getStack(input);
+
   return `\`\`\`text
 Build a complete production-ready web application based on this PRD.
 
-PROJECT DOMAIN:
-${profile.label}
-
-PROJECT NAME:
-${profile.projectName}
-
-PRODUCT IDEA:
-${cleanText(input.idea)}
+PRODUCT DIRECTION:
+This PRD was created by an AI Product Interviewer for beginners who want to build a website using AI coding tools. Do not turn this into an AI agent builder. Build the actual website described by the PRD.
 
 TECH STACK:
-- Frontend: ${tech.frontend}
-- Backend/API: ${tech.backend}
-- Database: ${tech.database}
-- Deployment: ${tech.deployment}
-- Language: TypeScript where applicable
-- Styling: Tailwind CSS or an equivalent utility-first CSS approach if the selected framework is not Next.js
+- Frontend: ${stack.frontend}
+- Backend/API: ${stack.backend}
+- Database: ${stack.database}
+- Deployment: ${stack.deployment}
+- Language: TypeScript
+- UI language: ${language === "en" ? "English" : "Bahasa Indonesia"}
 
 PAGES:
 ${profile.pages.map((page) => `- ${page}`).join("\n")}
 
 CORE FEATURES:
-${features.map((feature) => `- ${feature.name}: ${feature.description}`).join("\n")}
+${features.map((item) => `- ${item.name}: ${item.description}`).join("\n")}
 
-DATABASE TABLES:
-${tables.map((table) => `- ${table.name}: ${table.fields.join(", ")}`).join("\n")}
+DATABASE SCHEMA:
+${profile.tables.map((table) => `- ${table.name}: ${table.fields.join(", ")}`).join("\n")}
 
-API OR SERVER ACTIONS:
+API / SERVER ACTIONS:
 ${profile.apiActions.map((action) => `- ${action}`).join("\n")}
 
-USER FLOW:
-${profile.flow.map((step, index) => `${index + 1}. ${step}`).join("\n")}
-
 UI RULES:
-- Build an actual usable app, not only a landing page.
-- Create all required pages and connect them with realistic dummy/local data first.
-- Include responsive desktop and mobile layouts.
-- Include dashboard cards, forms, data lists/tables, detail views, empty states, loading states, error states, and success feedback.
-- Follow this design tone: ${profile.designTone}
-- Keep labels clear for non-technical users.
+- Build the real usable app, not only a landing page.
+- Include dashboard, forms, tables/lists, detail views, empty states, loading states, error states, and success feedback.
+- Use clear labels for non-technical users.
+- Responsive design must work on mobile and desktop.
+- Typography:
+  - Sans: Geist Mono, ui-monospace, monospace
+  - Serif: serif
+  - Mono: JetBrains Mono, monospace
 
 SECURITY RULES:
-- Validate all form inputs.
-- Never expose API keys or secrets in frontend code.
-- Protect user-owned data by userId or session identity when auth is added.
-- Sanitize displayed user-generated text where relevant.
-- Use environment variables only for future external services.
+- Validate all inputs on client and server/server-action layer.
+- Never expose API keys in frontend code.
+- Protect user-owned data by userId/session when auth is implemented.
+- Sanitize displayed user-generated text.
 
 ENVIRONMENT VARIABLES:
-- No environment variables are required for the MVP if using dummy/local data.
-- If a real database is added later, document required variables in .env.example and README.
+- No API key is required for the MVP unless you add a real external service.
+- If database credentials are needed, document them in .env.example.
+- Do not expose secrets in client components.
 
 DEPLOYMENT TARGET:
-- Deploy to ${tech.deployment}.
-- npm run build must pass before finishing.
-- Fix all TypeScript, runtime, lint, and build errors before final response.
+- Deploy to ${stack.deployment}.
 
 README REQUIREMENT:
 - Include setup instructions.
-- Include how to run locally.
-- Include how to build.
+- Include local development command.
+- Include build command.
 - Include deployment notes.
-- Include any environment variable requirements.
+- Include environment variable documentation.
 
-IMPLEMENTATION INSTRUCTIONS:
-1. Inspect the existing project structure before editing.
-2. Preserve existing working configuration unless a change is necessary.
-3. Implement the MVP pages and core flows end-to-end.
-4. Use dummy/local data first if no database credentials are available.
-5. Keep components reusable and files organized.
-6. Run npm run build.
-7. Summarize files changed and important implementation decisions.
-
-  Detected domain: ${domain}
+FINAL CHECK:
+- Run npm run build.
+- Fix all TypeScript/build/runtime errors before finishing.
 \`\`\``;
 }
 
-function generateEnglishPRD(input: GeneratePRDInput, domain: ProjectDomain) {
+function generateIndonesianPRD(input: GeneratePRDInput, domain: ProjectDomain) {
+  const profile = getProfile(domain);
   const idea = cleanText(input.idea);
-  const tech = getFinalStack(input, domain);
-  const tables = generateDatabaseSchema(domain, idea);
-  const domainLabel = domain.replace(/-/g, " ");
-  const projectName =
-    domain === "finance-tracker"
-      ? "Daily Finance Tracker"
-      : domain === "inventory"
-        ? "Warehouse Stock Control"
-        : domain === "booking-system"
-          ? "Service Booking Hub"
-          : domain === "ai-agent"
-            ? "Operational AI Agent"
-            : `${titleCase(idea) || "Smart Product"} App`;
-  const answeredContext = input.answers
-    .filter((answer) => answer.answer.trim())
-    .map((answer, index) => `${index + 1}. ${answer.question}\n   Answer: ${answer.answer}`)
-    .join("\n");
-  const featureNames =
-    domain === "finance-tracker"
-      ? ["Financial Dashboard", "Transaction Management", "Categories and Budgets", "Bills and Reminders", "Monthly Reports", "Report Export"]
-      : domain === "inventory"
-        ? ["Inventory Dashboard", "Product Management", "Stock In and Stock Out", "Batch and Location Tracking", "Low Stock Alerts", "Stock History"]
-        : domain === "ai-agent"
-          ? ["Agent Dashboard", "Agent Task Creation", "Approval and Action Control", "Agent Memory", "Data Integrations", "Execution History"]
-          : ["Main Dashboard", "Core Data Management", "Detail and History", "Search and Filters", "Reports and Export", "Settings"];
+  const stack = getStack(input);
+  const features = profile.featuresId;
 
   return `# PRD — Project Requirements Document
 
-## Project Name
-${projectName}
-
 ## 1. Overview
-${projectName} is a ${domainLabel} web application based on this idea:
+Produk ini adalah AI Product Interviewer untuk pemula yang ingin membuat website dengan bantuan AI coding tools.
 
-> ${idea}
+Ide website: "${idea}"
 
-The product replaces scattered manual workflows with a structured web application. The goal is to help users enter core data, monitor status, review history, and make decisions from one dashboard. The MVP should be practical, responsive, and usable without requiring external services at the start.
+Tujuan aplikasi adalah membantu ${profile.usersId.join(", ")} menyelesaikan proses ${profile.labelId} dengan alur yang lebih rapi, mudah dipantau, dan siap dikembangkan menjadi website nyata. Masalah utama yang ingin diselesaikan adalah proses lama yang masih manual, tersebar di catatan/chat/spreadsheet, sulit dicari ulang, dan tidak memiliki dashboard yang jelas. Kondisi lama/manual tersebut diganti dengan aplikasi web yang punya form input, penyimpanan data, dashboard, riwayat, validasi, dan laporan.
 
-Additional context from user answers:
-${answeredContext || "- No additional answers were provided."}
+Target pengguna utama adalah ${profile.usersId.join(", ")}. Ringkasan solusi: website ${profile.labelId} dengan fitur inti yang spesifik terhadap ide user, bukan AI agent builder dan bukan output generik.
+
+Konteks jawaban wawancara:
+${answersBlock(input.answers, "id")}
 
 ## 2. Requirements
-- **Platform:** Responsive web browser experience for desktop and mobile.
-- **Users:** Primary users, admins, and operational team members depending on the selected domain.
-- **Roles:** Demo user, admin, and member roles for MVP planning.
-- **Data Input:** Manual forms, filters, status updates, notes, and report actions.
-- **Stored Data:** Users, core domain records, activity history, settings, and report data.
-- **Notifications:** Visual dashboard alerts for important events, risks, reminders, or overdue items.
-- **MVP Limits:** Start with local or dummy data. Do not require external APIs, payment gateways, or secret keys.
-- **Security:** Validate input, keep secrets out of frontend code, and prepare ownership rules for future authentication.
-- **Recommended Stack:** Frontend ${tech.frontend}, backend ${tech.backend}, database ${tech.database}, deployment ${tech.deployment}.
+- **Aksesibilitas:** Website responsive, mudah dipakai pemula, label input jelas, kontras cukup, dan bisa digunakan di mobile maupun desktop.
+- **Pengguna:** ${profile.usersId.join(", ")}.
+- **Role Pengguna:** ${profile.rolesId.join(", ")}.
+- **Data Input:** ${profile.inputsId.join(", ")}.
+- **Spesifisitas Data:** Data harus mengikuti domain ${profile.labelId}; gunakan tabel ${profile.tables.map((table) => table.name).join(", ")} dan hindari nama tabel generic jika domain sudah jelas.
+- **Notifikasi:** ${profile.notificationsId}
+- **Keamanan:** Validasi input, pisahkan data per user/role, jangan expose API key di frontend, dan gunakan OPENROUTER_API_KEY hanya server-side bila dipakai.
+- **Batasan MVP:** Fokus pada flow utama, dashboard, CRUD data utama, riwayat, laporan/export bila relevan, fallback data lokal/dummy, dan build production berhasil.
 
 ## 3. Core Features
-${featureNames
-  .map(
-    (name, index) => `### 3.${index + 1} ${name}
-- **Description:** Provides the main capability needed for the ${domainLabel} workflow.
-- **Input:** User-entered data, filters, status, notes, and domain-specific fields.
-- **Output:** Updated dashboard, saved records, clear feedback, and useful history.
-- **Notes:** Keep the MVP focused, validated, responsive, and easy for non-technical users.`,
-  )
-  .join("\n\n")}
+${renderFeatures(features, "id")}
 
 ## 4. User Flow
-1. User opens the application.
-2. User logs in or enters demo mode.
-3. User views the dashboard and current status.
-4. User creates the main domain record.
-5. User validates and saves the form.
-6. User reviews the record in a list and detail page.
-7. User edits, deletes, filters, or updates status.
-8. User checks history, reports, and exports when relevant.
+${renderFlow(profile.flowId, "id")}
 
 ## 5. Architecture
-The application uses a simple web architecture. The frontend handles forms and interface state, the backend/API validates requests, and the database stores users, domain records, settings, and activity logs.
-
-\`\`\`mermaid
-sequenceDiagram
-    participant User as User Browser
-    participant UI as Frontend
-    participant API as Backend/API
-    participant DB as Database
-
-    User->>UI: Submit form or action
-    UI->>API: Send validated request
-    API->>API: Validate rules and permissions
-    API->>DB: Save record and activity log
-    DB-->>API: Return saved result
-    API-->>UI: Return success or validation error
-    UI-->>User: Update dashboard and list
-\`\`\`
+${renderArchitecture(profile, "id")}
 
 ## 6. Database Schema
-\`\`\`mermaid
-erDiagram
-${tables
-  .map(
-    (table) => `    ${table.name} {
-${table.fields.map((field) => `        ${field}`).join("\n")}
-    }`,
-  )
-  .join("\n\n")}
-\`\`\`
-
-| Table | Description |
-| --- | --- |
-${tables.map((table) => `| ${table.name} | Stores ${table.name.replace(/_/g, " ")} data for the application. |`).join("\n")}
+${renderErd(profile)}
 
 ## 7. Design & Technical Constraints
-- **UI Style:** Clean, modern, dashboard-focused, and easy to scan.
-- **Typography:** Use readable sans-serif typography with clear hierarchy.
-- **Responsive Design:** Support mobile, tablet, and desktop layouts.
-- **Accessibility:** Use labels, visible focus states, clear contrast, and keyboard-friendly controls.
-- **Performance:** Keep dependencies minimal and avoid external requests in the MVP.
-- **Security:** Validate input, protect user-owned data, and never expose API keys in frontend code.
-- **Deployment:** Deploy to ${tech.deployment}.
+- **High-Level Technology:** Frontend ${stack.frontend}, backend ${stack.backend}, database ${stack.database}, deployment ${stack.deployment}.
+- **Typography Rules:** Sans: Geist Mono, ui-monospace, monospace. Serif: serif. Mono: JetBrains Mono, monospace.
+- **UI Style:** ${profile.designToneId}
+- **Responsive Design:** Semua halaman harus nyaman di mobile 360px, tablet, dan desktop. Form, tabel, dan dashboard tidak boleh overflow.
+- **Performance:** Hindari request eksternal yang tidak perlu, gunakan data lokal/dummy untuk MVP, cache hasil wizard di localStorage, dan jangan panggil API saat user mengetik.
+- **Security:** OPENROUTER_API_KEY hanya server-side, validasi semua mutation, sanitasi teks user, dan jangan expose secret di client component.
+- **Deployment:** Target ${stack.deployment}. Build dengan \`npm run build\` wajib berhasil.
 
-## 8. API Specification
-\`\`\`ts
-createRecord(data)
-updateRecord(id, data)
-deleteRecord(id)
-getRecords(filters)
-getRecordById(id)
-getDashboardSummary(filters)
-createActivityLog(data)
-exportRecords(filters)
-\`\`\`
+## 8. API Specification / Server Actions
+${renderApi(profile, "id")}
 
 ## 9. Acceptance Criteria
-- [ ] User can enter demo mode or log in.
-- [ ] User can create the main record.
-- [ ] User can view dashboard metrics.
-- [ ] User can edit and delete records.
-- [ ] User can search and filter data.
-- [ ] Activity history is available.
+- [ ] User bisa menambahkan data utama.
+- [ ] User bisa melihat dashboard.
+- [ ] User bisa mengedit data.
+- [ ] User bisa menghapus data.
+- [ ] Sistem menampilkan validasi error.
+- [ ] UI responsive di mobile dan desktop.
+- [ ] User bisa melihat riwayat atau status data utama.
+- [ ] User bisa export laporan jika fitur laporan relevan.
+- [ ] Build production berhasil.
+- [ ] Tidak ada API key terekspos di frontend.
+
+## 10. Prompt untuk AI Coding Tool
+${renderPrompt(input, profile, features, "id")}`;
+}
+
+function generateEnglishPRD(input: GeneratePRDInput, domain: ProjectDomain) {
+  const profile = getProfile(domain);
+  const idea = cleanText(input.idea);
+  const stack = getStack(input);
+  const features = profile.featuresEn;
+
+  return `# PRD — Project Requirements Document
+
+## 1. Overview
+This product is an AI Product Interviewer for beginners who want to build a website with AI coding tools.
+
+Website idea: "${idea}"
+
+The application helps ${profile.usersEn.join(", ")} handle ${profile.labelEn} with a clearer, more trackable workflow. The main problem is that the old/manual process is scattered across notes, chats, spreadsheets, or memory, making it hard to search, validate, monitor, and report. The solution replaces that process with a real web application with input forms, stored data, dashboard, history, validation, and reports.
+
+The primary users are ${profile.usersEn.join(", ")}. Solution summary: a ${profile.labelEn} website with domain-specific features, not an AI agent builder and not a generic app output.
+
+Interview context:
+${answersBlock(input.answers, "en")}
+
+## 2. Requirements
+- **Accessibility:** Responsive website, beginner-friendly language, clear labels, sufficient contrast, and usable on mobile and desktop.
+- **Users:** ${profile.usersEn.join(", ")}.
+- **User Roles:** ${profile.rolesEn.join(", ")}.
+- **Data Input:** ${profile.inputsEn.join(", ")}.
+- **Data Specificity:** Data must match the ${profile.labelEn} domain; use tables ${profile.tables.map((table) => table.name).join(", ")} and avoid generic table names when the domain is clear.
+- **Notifications:** ${profile.notificationsEn}
+- **Security:** Validate input, separate data by user/role, never expose API keys in frontend, and use OPENROUTER_API_KEY only server-side if used.
+- **MVP Scope:** Focus on main flow, dashboard, core CRUD, history, reports/export when relevant, local/dummy fallback data, and successful production build.
+
+## 3. Core Features
+${renderFeatures(features, "en")}
+
+## 4. User Flow
+${renderFlow(profile.flowEn, "en")}
+
+## 5. Architecture
+${renderArchitecture(profile, "en")}
+
+## 6. Database Schema
+${renderErd(profile)}
+
+## 7. Design & Technical Constraints
+- **High-Level Technology:** Frontend ${stack.frontend}, backend ${stack.backend}, database ${stack.database}, deployment ${stack.deployment}.
+- **Typography Rules:** Sans: Geist Mono, ui-monospace, monospace. Serif: serif. Mono: JetBrains Mono, monospace.
+- **UI Style:** ${profile.designToneEn}
+- **Responsive Design:** All pages must work well on 360px mobile, tablet, and desktop. Forms, tables, and dashboard must not overflow.
+- **Performance:** Avoid unnecessary external requests, use local/dummy data for MVP, cache wizard output in localStorage, and never call API while the user is typing.
+- **Security:** OPENROUTER_API_KEY is server-side only, validate all mutations, sanitize user text, and never expose secrets in client components.
+- **Deployment:** Target ${stack.deployment}. \`npm run build\` must pass.
+
+## 8. API Specification / Server Actions
+${renderApi(profile, "en")}
+
+## 9. Acceptance Criteria
+- [ ] User can add the main data.
+- [ ] User can view the dashboard.
+- [ ] User can edit data.
+- [ ] User can delete data.
+- [ ] System shows validation errors.
 - [ ] UI is responsive on mobile and desktop.
-- [ ] Input validation works.
+- [ ] User can view history or main data status.
+- [ ] User can export reports when reporting is relevant.
 - [ ] Production build passes.
 - [ ] No API key is exposed in frontend code.
 
-## 10. Prompt for AI Coding Agent
-\`\`\`text
-Build a complete production-ready web application based on this PRD.
-
-Use this stack:
-- Frontend: ${tech.frontend}
-- Backend/API: ${tech.backend}
-- Database: ${tech.database}
-- Deployment: ${tech.deployment}
-
-Build real usable pages, not only a landing page. Include dashboard, CRUD forms, lists, detail pages, settings, validation, loading states, error states, success feedback, dummy/local data fallback, and responsive UI. Do not expose API keys. Run npm run build and fix all TypeScript/build errors before finishing.
-\`\`\`
-`;
+## 10. Prompt for AI Coding Tool
+${renderPrompt(input, profile, features, "en")}`;
 }
 
 export function generatePRD(input: GeneratePRDInput) {
-  const idea = cleanText(input.idea);
-  const domain = input.domain || detectProjectDomain(idea);
-  if (input.language === "en") {
-    return generateEnglishPRD(input, domain);
-  }
-  const profile = getDomainProfile(domain, idea);
-  const tech = getFinalStack(input, domain);
-  const tables = generateDatabaseSchema(domain, idea);
-  const features = generateCoreFeatures(domain, input.answers);
-  const answeredContext = getAnsweredContext(input.answers);
-
-  return normalizePrdExceptFinalPrompt(`# PRD — Project Requirements Document
-
-## Nama Proyek
-${profile.projectName}
-
-## 1. Overview
-${profile.projectName} adalah aplikasi ${profile.label} yang dibuat berdasarkan ide berikut:
-
-> ${idea}
-
-Masalah utama yang ingin diselesaikan adalah proses lama yang masih manual, tersebar, sulit dipantau, dan tidak punya sumber data yang konsisten. Pada domain ${profile.label}, user biasanya membutuhkan alur yang jelas untuk memasukkan data, melihat status terbaru, memahami riwayat, dan mengambil tindakan tanpa membuka banyak tool berbeda.
-
-Target pengguna utama adalah ${profile.targetUsers.join(", ")}. Solusi yang disarankan adalah aplikasi web responsive dengan dashboard, form input, list/detail data, activity history, settings, dan report sesuai domain.
-
-Domain yang terdeteksi: **${profile.label}**
-
-Konteks tambahan dari jawaban user:
-${answeredContext}
-
-## 2. Requirements
-- **Platform:** Web browser, responsive desktop dan mobile.
-- **Pengguna:** ${profile.targetUsers.join(", ")}.
-- **Role Pengguna:** ${profile.roles.join(", ")}.
-- **Metode Input Data:** ${profile.inputMethods.join(", ")}.
-- **Data Utama yang Disimpan:** ${profile.storedData.join(", ")}.
-- **Notifikasi/Alert:** ${profile.notifications}
-- **Batasan MVP:** Buat MVP usable dengan dummy/local data terlebih dahulu. Jangan gunakan API eksternal, Firebase, OpenAI API, payment gateway, atau secret key pada versi awal.
-- **Security:** Login/demo mode, validasi input, ownership data per user/workspace, sanitasi text output, dan tidak mengekspos secret di frontend.
-- **Mode Preferensi Teknologi:** ${input.techMode === "ai" ? "Biarkan AI pilih" : "Pilih sendiri"}.
-- **Stack Rekomendasi:** Frontend ${tech.frontend}, backend ${tech.backend}, database ${tech.database}, deployment ${tech.deployment}.
-- **Alasan Stack:** ${tech.reason}
-
-## 3. Core Features
-${renderCoreFeatures(features)}
-
-## 4. User Flow
-${profile.flow.map((step, index) => `${index + 1}. ${step}`).join("\n")}
-
-## 5. Architecture
-${renderArchitecture(profile)}
-
-## 6. Database Schema
-${renderErd(tables, profile)}
-
-## 7. Design & Technical Constraints
-- **Gaya UI:** ${profile.designTone}
-- **Typography:** Gunakan font sans-serif modern, heading jelas, body text nyaman, dan spacing konsisten.
-- **Warna:** Gunakan palet dark/neutral atau clean light sesuai produk, dengan warna status yang jelas untuk success, warning, danger, dan info.
-- **Desain Responsif:** Semua halaman harus nyaman di mobile 360px, tablet, dan desktop.
-- **Accessibility:** Setiap input punya label, focus state terlihat, kontras cukup, tombol punya teks jelas, dan flow bisa dipakai keyboard.
-- **Performance:** Minimalkan dependency, hindari request eksternal pada MVP, gunakan component sederhana, dan pastikan data dummy tidak membuat UI lambat.
-- **Security:** Validasi input di client dan server layer, pisahkan data per user/workspace, jangan expose API key, dan siapkan .env.example hanya jika service eksternal ditambahkan nanti.
-- **Target Deployment:** ${tech.deployment}.
-- **Implementasi Rekomendasi:** ${tech.frontend}, ${tech.backend}, ${tech.database}, dan TypeScript.
-
-## 8. API Specification / Server Actions
-${renderApiSpec(profile, tech.backend)}
-
-## 9. Acceptance Criteria
-${profile.acceptance.map((item) => `- [ ] ${item}`).join("\n")}
-- [ ] User bisa login atau masuk sebagai demo user.
-- [ ] UI responsive di mobile dan desktop.
-- [ ] Empty state, loading state, error state, dan success feedback tersedia.
-- [ ] Build production berhasil.
-- [ ] Tidak ada API key yang terekspos di frontend.
-
-## 10. Prompt untuk AI Coding Agent
-${renderFinalAgentPrompt(input, domain, profile, tech, tables, features)}
-`);
+  const domain = input.domain || detectProjectDomain(input.idea);
+  return input.language === "en" ? generateEnglishPRD(input, domain) : generateIndonesianPRD(input, domain);
 }
 
-export { genericQuestions as defaultQuestions };
+export { discoveryQuestionsId as defaultQuestions };
